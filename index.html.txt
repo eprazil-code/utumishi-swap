@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utumishi Swap - Mfumo wa Kubadilishana Vituo vya Kazi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
+
+    <!-- Top Helpline Bar -->
+    <div class="bg-emerald-900 text-emerald-100 py-2 px-4 text-xs md:text-sm text-center font-medium">
+        <i class="fa-solid fa-headset mr-2 text-emerald-400"></i> Huduma kwa Wateja / Support: 
+        <a href="tel:0657576696" class="underline font-bold text-white hover:text-emerald-300">0657 576 696</a> | 
+        <a href="tel:0755154363" class="underline font-bold text-white hover:text-emerald-300">0755 154 363</a>
+    </div>
+
+    <!-- Header / Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="navigate('authView')">
+                <div class="bg-emerald-600 text-white p-2 rounded-lg font-black text-xl">US</div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none text-slate-900">Utumishi<span class="text-emerald-600">Swap</span></h1>
+                    <p class="text-xs text-slate-500">Mfumo wa Kubadilishana Vituo Utumishi</p>
+                </div>
+            </div>
+
+            <!-- Logged In Navigation Links -->
+            <nav id="appNavLinks" class="hidden flex items-center space-x-1 md:space-x-3">
+                <button onclick="navigate('dashboardView')" class="px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition">
+                    <i class="fa-solid fa-chart-line mr-1"></i> Dashboard
+                </button>
+                <button onclick="navigate('profileView')" class="px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition">
+                    <i class="fa-solid fa-user mr-1"></i> Profile Yangu
+                </button>
+                <button onclick="navigate('commentsView')" class="px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition">
+                    <i class="fa-solid fa-comments mr-1"></i> Maoni
+                </button>
+                <button onclick="logoutUser()" class="bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold px-3 py-1.5 rounded-lg transition ml-2">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Toka
+                </button>
+            </nav>
+
+            <!-- Admin Button -->
+            <button id="adminLoginNavBtn" onclick="navigate('adminView')" class="bg-slate-800 text-slate-100 text-xs font-bold px-3 py-2 rounded-lg hover:bg-slate-900 transition">
+                <i class="fa-solid fa-user-shield mr-1"></i> Admin
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-1">
+
+        <!-- ================= PAGE 1: LOGIN / REGISTER ================= -->
+        <div id="authView" class="space-y-6">
+            <section class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white rounded-2xl p-6 md:p-8 shadow-xl text-center md:text-left">
+                <div class="max-w-2xl">
+                    <span class="bg-emerald-900/80 text-emerald-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Mfumo wa Kitaalamu</span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold mt-2 mb-2">Kubadilishana Vituo vya Kazi Utumishi wa Umma</h2>
+                    <p class="text-emerald-100 text-sm leading-relaxed">Sajili taarifa zako kwa kuchagua Mkoa na Wilaya. Mfumo utakutafutia mtumishi wa kada yako anayetaka kuja kituo chako kiotomatiki!</p>
+                </div>
+            </section>
+
+            <!-- Registration Success Alert Banner -->
+            <div id="regSuccessBanner" class="hidden bg-emerald-100 border-2 border-emerald-500 text-emerald-900 p-4 rounded-xl flex items-center space-x-3 shadow-md">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-3xl"></i>
+                <div>
+                    <h4 class="font-bold text-base">REGISTERED SUCCESSFUL! / USAJILI UMEKAMILIKA!</h4>
+                    <p class="text-xs text-emerald-800">Akaunti yako imetengenezwa kikamilifu. Karibu uingize Email na Password yako hapa chini ili kuingia Kwenye Mfumo.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Registration Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-user-plus text-emerald-600 mr-2"></i> Form ya Usajili Mpya</h3>
+                        <span class="text-xs text-slate-400">Jaza Taarifa</span>
+                    </div>
+
+                    <form id="signupForm" onsubmit="handleSignup(event)" class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Email / Username *</label>
+                                <input type="email" id="signEmail" required placeholder="example@gmail.com" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Password (Nenosiri) *</label>
+                                <input type="password" id="signPass" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Jina Kamili *</label>
+                                <input type="text" id="signName" required placeholder="Mf. Mwl. Juma Ally" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Namba ya Simu / WhatsApp *</label>
+                                <input type="tel" id="signPhone" required placeholder="07XXXXXXXX" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Kada Yako *</label>
+                                <select id="signKada" onchange="toggleSubjectsSignup()" required class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="">-- Chagua Kada --</option>
+                                    <option value="Ualimu - Sekondari">Ualimu - Sekondari</option>
+                                    <option value="Ualimu - Shule ya Msingi">Ualimu - Shule ya Msingi</option>
+                                    <option value="Afya - Tabibu / Daktari">Afya - Tabibu / Daktari</option>
+                                    <option value="Afya - Muuguzi (Nurse)">Afya - Muuguzi (Nurse)</option>
+                                    <option value="Afya - Maabara">Afya - Maabara</option>
+                                    <option value="Afisa Kilimo / Mifugo">Afisa Kilimo / Mifugo</option>
+                                    <option value="Utawala / Afisa Muhtasi">Utawala / Afisa Muhtasi</option>
+                                    <option value="Afisa Maendeleo ya Jamii">Afisa Maendeleo ya Jamii</option>
+                                    <option value="Kada Nyingine">Kada Nyingine</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Miaka Kazini *</label>
+                                <input type="number" id="signYears" min="0" max="45" required placeholder="Mf. 4" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <!-- Masomo kwa Walimu -->
+                        <div id="signupSubjectSec" class="hidden grid-cols-1 md:grid-cols-2 gap-3 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                            <div>
+                                <label class="block text-xs font-semibold text-emerald-800 mb-1">Somo la Kwanza</label>
+                                <input type="text" id="signSub1" placeholder="Mf. Mathematics" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-emerald-800 mb-1">Somo la Pili</label>
+                                <input type="text" id="signSub2" placeholder="Mf. Physics" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                        </div>
+
+                        <!-- SELECT MKOA NA WILAYA YA SASA -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Mkoa Uliopo Sasa *</label>
+                                <select id="signCurrentRegion" onchange="loadDistricts('signCurrentRegion', 'signCurrentDistrict')" required class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="">-- Chagua Mkoa --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Wilaya Yako *</label>
+                                <select id="signCurrentDistrict" required class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="">-- Chagua Wilaya --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- SELECT MKOA NA WILAYA TARGET -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Mkoa Unakotaka Kwenda *</label>
+                                <select id="signTargetRegion" onchange="loadDistricts('signTargetRegion', 'signTargetDistrict')" required class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="">-- Chagua Mkoa --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Wilaya Unakotaka Kwenda</label>
+                                <select id="signTargetDistrict" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="">-- Chagua Wilaya --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-sm shadow transition mt-2">
+                            Kamilisha Usajili Sasa
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Login Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <div class="border-b pb-3 mb-4">
+                            <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-right-to-bracket text-emerald-600 mr-2"></i> Kuingia Kwenye Akaunti (Login)</h3>
+                            <p class="text-xs text-slate-500">Weka Email na Password yako hapa ili kuingia kwenye mfumo.</p>
+                        </div>
+
+                        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Email / Username *</label>
+                                <input type="email" id="loginEmail" required placeholder="example@gmail.com" class="w-full px-3 py-2.5 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Password (Nenosiri) *</label>
+                                <input type="password" id="loginPass" required placeholder="••••••••" class="w-full px-3 py-2.5 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-lg text-sm shadow transition">
+                                Ingia Kwenye Mfumo (Login)
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 mt-6 text-xs text-emerald-800 space-y-1">
+                        <p class="font-bold"><i class="fa-solid fa-robot text-emerald-600 mr-1"></i> Automatic Payment Listener:</p>
+                        <p>Ukituma TZS 2,000 kwenda M-Pesa <strong>0755 154 363</strong>, mfumo unasoma SMS ya Vodacom kiotomatiki na kukupa VIP Access papo hapo!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 2: USER DASHBOARD ================= -->
+        <div id="dashboardView" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span id="dashPaidBadge" class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase">Account Status: FREE</span>
+                    <h2 id="dashWelcomeName" class="text-2xl font-bold text-slate-900 mt-2">Karibu, Mtumishi!</h2>
+                    <p id="dashUserSummary" class="text-xs text-slate-500 mt-1">...</p>
+                </div>
+                <div id="dashPayNotice" class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs space-y-2 max-w-sm">
+                    <p class="font-bold text-amber-900"><i class="fa-solid fa-lock mr-1"></i> Ona Namba za Simu & Chat WhatsApp:</p>
+                    <p class="text-amber-800">Lipia TZS 2,000 uweze kufungua mawasiliano ya watu wote wanaomatch nawe!</p>
+                    <button onclick="openPaymentModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow transition">
+                        Lipia TZS 2,000 Sasa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Matches Section -->
+            <section>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-800">
+                        <i class="fa-solid fa-users-line text-emerald-600 mr-2"></i> Watumishi Wanaomatch na Wewe TU (<span id="dashMatchCount">0</span>)
+                    </h3>
+                </div>
+                <div id="dashMatchesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Dynamic Matches Cards -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= PAGE 3: MY PROFILE ================= -->
+        <div id="profileView" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-2xl mx-auto">
+                <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-3"><i class="fa-solid fa-user-gear text-emerald-600 mr-2"></i> Profile na Taarifa Zako</h3>
+                
+                <form id="updateProfileForm" onsubmit="handleUpdateProfile(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Jina Kamili</label>
+                        <input type="text" id="profName" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Namba ya Simu / WhatsApp</label>
+                        <input type="tel" id="profPhone" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Mkoa Uliopo Sasa</label>
+                            <select id="profCurrentReg" onchange="loadDistricts('profCurrentReg', 'profCurrentDist')" class="w-full px-3 py-2 border rounded-lg text-sm"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Wilaya Yako</label>
+                            <select id="profCurrentDist" class="w-full px-3 py-2 border rounded-lg text-sm"></select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Mkoa Unakotaka Kwenda</label>
+                            <select id="profTargetReg" onchange="loadDistricts('profTargetReg', 'profTargetDist')" class="w-full px-3 py-2 border rounded-lg text-sm"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Wilaya Unakotaka Kwenda</label>
+                            <select id="profTargetDist" class="w-full px-3 py-2 border rounded-lg text-sm"></select>
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-5 rounded-lg text-sm transition">
+                        Sasisha Taarifa (Update Profile)
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 4: COMMENTS ================= -->
+        <div id="commentsView" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-3xl mx-auto">
+                <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-3"><i class="fa-solid fa-comments text-emerald-600 mr-2"></i> Maoni na Mrejesho wa Watumishi</h3>
+
+                <form onsubmit="postComment(event)" class="mb-6 space-y-3">
+                    <textarea id="cmtText" required rows="3" placeholder="Andika maoni yako hapa kuhusu huduma au mfumo huu..." class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                    <button type="submit" class="bg-slate-800 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-lg transition">Tuma Maoni</button>
+                </form>
+
+                <div id="commentsFeed" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-xs text-slate-800">Mwl. Godfrey S. (Morogoro)</span>
+                            <span class="text-[10px] text-slate-400">Hivi Karibuni</span>
+                        </div>
+                        <p class="text-xs text-slate-600">Mfumo umenisadia sana kupata mtu wa kubadilishana naye Mbeya. Ahsante sana admin!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 5: ADMIN PANEL ================= -->
+        <div id="adminView" class="hidden space-y-6">
+            <!-- Admin Login Box -->
+            <div id="adminLoginForm" class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
+                <h3 class="text-lg font-bold text-slate-800 text-center"><i class="fa-solid fa-user-shield text-emerald-600 mr-1"></i> Admin Login</h3>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Username / Email</label>
+                    <input type="text" id="adminUser" placeholder="Weka Admin Username" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                    <input type="password" id="adminPass" placeholder="Weka Admin Password" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <button onclick="loginAdmin()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2 rounded-lg text-sm transition">
+                    Ingia Kwenye Mfumo wa Admin
+                </button>
+            </div>
+
+            <!-- Admin Dashboard Content -->
+            <div id="adminDashboard" class="hidden space-y-6">
+                <div class="flex justify-between items-center bg-slate-900 text-white p-4 rounded-xl">
+                    <h2 class="font-bold text-lg">Admin Management Dashboard</h2>
+                    <button onclick="logoutAdmin()" class="bg-red-600 text-xs px-3 py-1.5 rounded font-bold hover:bg-red-700">Log Out Admin</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-bold">Jumla ya Watumishi</p>
+                        <h3 id="statTotalUsers" class="text-2xl font-black text-slate-800">0</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-bold">Waliolipia (VIP Active)</p>
+                        <h3 id="statPaidUsers" class="text-2xl font-black text-emerald-600">0</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-bold">Jumla ya Mapato</p>
+                        <h3 id="statEarnings" class="text-2xl font-black text-amber-600">TZS 0</h3>
+                    </div>
+                </div>
+
+                <!-- Live Test SMS Gateway Section for Admin -->
+                <div class="bg-slate-800 text-white p-4 rounded-xl space-y-3">
+                    <h4 class="font-bold text-sm text-emerald-400"><i class="fa-solid fa-mobile-retro mr-1"></i> SMS Gateway Auto-Confirmation Tester (Simulate 0755154363):</h4>
+                    <p class="text-xs text-slate-300">Tumia sehemu hii kujaribu jinsi SMS ya M-Pesa inavyoingia kwenye mfumo na kum-approve mtumishi kiotomatiki!</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="simulatedSms" placeholder="9AB87XX123 Imepokelewa TZS 2,000.00 kutoka kwa 255712345678" class="flex-1 px-3 py-2 text-xs text-slate-900 rounded border">
+                        <button onclick="simulateIncomingMpesaSms()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 text-xs rounded">
+                            Tuma SMS (Simulate)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+                    <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha ya Watumishi Wote Waliojisajili</h3>
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-600 border-b">
+                            <tr>
+                                <th class="p-2">Jina</th>
+                                <th class="p-2">Email</th>
+                                <th class="p-2">Simu</th>
+                                <th class="p-2">Kada</th>
+                                <th class="p-2">Mkoa Sasa</th>
+                                <th class="p-2">Mkoa Target</th>
+                                <th class="p-2">Malipo</th>
+                                <th class="p-2">Hatua</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUserTable">
+                            <!-- Rows via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h4 class="font-bold text-slate-800 text-lg">Lipia TZS 2,000 Kuona Mawasiliano</h4>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+
+            <p class="text-xs text-slate-600">
+                Lipia TZS 2,000 mara moja tu ili kuona namba za simu na kuwasiliana na watumishi wote wanaomatch nawe!
+            </p>
+
+            <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs space-y-1">
+                <p class="font-bold text-amber-800"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Namba ya Lipa / Kutuma:</p>
+                <p class="text-amber-700">Tuma <strong>TZS 2,000</strong> kwenda Vodacom M-Pesa:</p>
+                <p class="text-base font-black text-amber-900 bg-amber-100 p-2 rounded text-center my-1 select-all">0755 154 363</p>
+                <p class="text-amber-700">Jina la Akaunti: <strong>UTUMISHI SWAP</strong></p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Chagua Mtandao:</label>
+                <select id="payNetwork" class="w-full px-3 py-2 border rounded-lg text-sm outline-none">
+                    <option value="M-Pesa">M-Pesa (Vodacom)</option>
+                    <option value="Tigo Pesa">Tigo Pesa (Yas)</option>
+                    <option value="Airtel Money">Airtel Money</option>
+                    <option value="HaloPesa">HaloPesa</option>
+                    <option value="Benki">Benki (NMB/CRDB)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Namba ya Muamala (Transaction ID Code):</label>
+                <input type="text" id="payTxCode" placeholder="Mf. 9AB87XX..." class="w-full px-3 py-2 border rounded-lg text-sm outline-none uppercase">
+            </div>
+
+            <button onclick="submitPayment()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-sm shadow transition">
+                Thibitisha Malipo Sasa
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 mt-8 text-xs">
+        <div class="max-w-6xl mx-auto px-4 text-center space-y-2">
+            <p class="font-semibold text-slate-300">&copy; Utumishi Swap Tanzania. Haki zote zimehifadhiwa.</p>
+            <p>Huduma kwa Wateja / Msaada wa Mfumo: <strong class="text-emerald-400">0657 576 696</strong> au <strong class="text-emerald-400">0755 154 363</strong></p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application & Gateway Logic -->
+    <script>
+        // Mikoa & Wilaya Data Store
+        const tanzaniaRegions = {
+            "Dar es Salaam": ["Kinondoni", "Ilala", "Temeke", "Ubungo", "Kigamboni"],
+            "Dodoma": ["Dodoma Mjini", "Bahi", "Chamwino", "Chemba", "Kondoa", "Kongwa", "Mpwapwa"],
+            "Mwanza": ["Nyamagana", "Ilemela", "Misungwi", "Magu", "Kwimba", "Sengerema", "Ukerewe"],
+            "Arusha": ["Arusha Mjini", "Arumeru", "Karatu", "Longido", "Monduli", "Ngorongoro"],
+            "Mbeya": ["Mbeya Jiji", "Mbeya Vijijini", "Chunya", "Kyela", "Rungwe"],
+            "Morogoro": ["Morogoro Mjini", "Gairo", "Kilombero", "Kilosa", "Luangwa", "Mvomero"],
+            "Tanga": ["Tanga Jiji", "Muheza", "Korogwe", "Lushoto", "Pangani", "Handeni"],
+            "Kilimanjaro": ["Moshi Mjini", "Moshi Vijijini", "Hai", "Siha", "Rombo", "Same", "Mwanga"],
+            "Tabora": ["Tabora Mjini", "Igunga", "Kaliua", "Nzega", "Sikonge", "Urambo"],
+            "Kagera": ["Bukoba Mjini", "Bukoba Vijijini", "Muleba", "Karagwe", "Ngara", "Biharamulo"],
+            "Shinyanga": ["Shinyanga Mjini", "Kahama Mjini", "Kishapu", "Msalala"],
+            "Iringa": ["Iringa Mjini", "Iringa Vijijini", "Kilolo", "Mufindi"],
+            "Mara": ["Musoma Mjini", "Bunda", "Tarime", "Rorya", "Serengeti"],
+            "Ruvuma": ["Songea Mjini", "Mbinga", "Namtumbo", "Nyasa", "Tunduru"],
+            "Songwe": ["Vwawa", "Mbozi", "Ileje", "Momba"],
+            "Kigoma": ["Kigoma Ujiji", "Kasulu", "Kibondo", "Kakonko"],
+            "Singida": ["Singida Mjini", "Iramba", "Manyoni", "Ikungi"],
+            "Katavi": ["Mpanda Mjini", "Mlele", "Tanganyika"],
+            "Lindi": ["Lindi Mjini", "Kilwa", "Liwale", "Nachingwea"],
+            "Mtwara": ["Mtwara Mikindani", "Masasi", "Nanyumbu", "Newala"],
+            "Njombe": ["Njombe Mjini", "Makambako", "Ludewa", "Wanging'ombe"],
+            "Pwani": ["Kibaha Mjini", "Bagamoyo", "Kisarawe", "Mkuranga", "Rufiji"],
+            "Rukwa": ["Sumbawanga Mjini", "Kalambo", "Nkasi"],
+            "Simiyu": ["Bariadi Mjini", "Busega", "Itilima", "Maswa", "Meatu"],
+            "Geita": ["Geita Mjini", "Chato", "Mbogwe", "Nyang'hwale", "Bukombe"],
+            "Manyara": ["Babati Mjini", "Hanang", "Kiteto", "Mbulu", "Simanjiro"]
+        };
+
+        function initRegions() {
+            const selectIds = ['signCurrentRegion', 'signTargetRegion', 'profCurrentReg', 'profTargetReg'];
+            selectIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.innerHTML = `<option value="">-- Chagua Mkoa --</option>`;
+                Object.keys(tanzaniaRegions).forEach(region => {
+                    el.innerHTML += `<option value="${region}">${region}</option>`;
+                });
+            });
+        }
+
+        function loadDistricts(regionSelectId, districtSelectId) {
+            const regVal = document.getElementById(regionSelectId).value;
+            const distEl = document.getElementById(districtSelectId);
+            distEl.innerHTML = `<option value="">-- Chagua Wilaya --</option>`;
+
+            if (regVal && tanzaniaRegions[regVal]) {
+                tanzaniaRegions[regVal].forEach(d => {
+                    distEl.innerHTML += `<option value="${d}">${d}</option>`;
+                });
+            }
+        }
+
+        // Global State
+        let currentUser = null;
+        let users = [
+            {
+                id: 1,
+                email: "juma@gmail.com",
+                pass: "123456",
+                name: "Mwl. Juma Hassan",
+                phone: "0712345678",
+                kada: "Ualimu - Sekondari",
+                years: 4,
+                currentRegion: "Dodoma",
+                currentDistrict: "Dodoma Mjini",
+                targetRegion: "Mwanza",
+                targetDistrict: "Nyamagana",
+                sub1: "Biology",
+                sub2: "Chemistry",
+                paid: false
+            },
+            {
+                id: 2,
+                email: "anna@gmail.com",
+                pass: "123456",
+                name: "Mwl. Anna Peter",
+                phone: "0784112233",
+                kada: "Ualimu - Sekondari",
+                years: 3,
+                currentRegion: "Mwanza",
+                currentDistrict: "Nyamagana",
+                targetRegion: "Dodoma",
+                targetDistrict: "Dodoma Mjini",
+                sub1: "Biology",
+                sub2: "Chemistry",
+                paid: true
+            }
+        ];
+
+        function navigate(viewId) {
+            ['authView', 'dashboardView', 'profileView', 'commentsView', 'adminView'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        function toggleSubjectsSignup() {
+            const kada = document.getElementById('signKada').value;
+            const sec = document.getElementById('signupSubjectSec');
+            if (kada.includes('Ualimu')) {
+                sec.classList.remove('hidden');
+                sec.classList.add('grid');
+            } else {
+                sec.classList.add('hidden');
+                sec.classList.remove('grid');
+            }
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const email = document.getElementById('signEmail').value.trim().toLowerCase();
+
+            if (users.some(u => u.email === email)) {
+                alert("Email hii tayari imetumika. Tafadhali tumia email nyingine au ingia moja kwa moja.");
+                return;
+            }
+
+            const newUser = {
+                id: Date.now(),
+                email: email,
+                pass: document.getElementById('signPass').value,
+                name: document.getElementById('signName').value,
+                phone: document.getElementById('signPhone').value,
+                kada: document.getElementById('signKada').value,
+                years: parseInt(document.getElementById('signYears').value),
+                currentRegion: document.getElementById('signCurrentRegion').value,
+                currentDistrict: document.getElementById('signCurrentDistrict').value,
+                targetRegion: document.getElementById('signTargetRegion').value,
+                targetDistrict: document.getElementById('signTargetDistrict').value,
+                sub1: document.getElementById('signSub1').value,
+                sub2: document.getElementById('signSub2').value,
+                paid: false
+            };
+
+            users.unshift(newUser);
+
+            document.getElementById('signupForm').reset();
+            document.getElementById('regSuccessBanner').classList.remove('hidden');
+            
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPass').value = '';
+
+            document.getElementById('loginForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('loginPass').value;
+
+            const found = users.find(u => u.email === email && u.pass === pass);
+            if (found) {
+                currentUser = found;
+                document.getElementById('regSuccessBanner').classList.add('hidden');
+                document.getElementById('appNavLinks').classList.remove('hidden');
+                renderDashboard();
+                populateProfile();
+                navigate('dashboardView');
+            } else {
+                alert("Email au Password si sahihi! Tafadhali hakiki tena.");
+            }
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            document.getElementById('appNavLinks').classList.add('hidden');
+            document.getElementById('signupForm').reset();
+            document.getElementById('loginForm').reset();
+            navigate('authView');
+        }
+
+        function renderDashboard() {
+            if (!currentUser) return;
+
+            document.getElementById('dashWelcomeName').innerText = `Karibu, ${currentUser.name}!`;
+            document.getElementById('dashUserSummary').innerText = `${currentUser.kada} | Sasa Yupo: ${currentUser.currentRegion} (${currentUser.currentDistrict}) ➔ Anataka Kwenda: ${currentUser.targetRegion}`;
+
+            const badge = document.getElementById('dashPaidBadge');
+            const payNotice = document.getElementById('dashPayNotice');
+
+            if (currentUser.paid) {
+                badge.innerText = "Account Status: VIP Active (Umelipia)";
+                badge.className = "bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
+                payNotice.classList.add('hidden');
+            } else {
+                badge.innerText = "Account Status: FREE (Bado Hujalipia)";
+                badge.className = "bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
+                payNotice.classList.remove('hidden');
+            }
+
+            const matches = users.filter(u => {
+                if (u.id === currentUser.id) return false;
+
+                const matchKada = u.kada === currentUser.kada;
+                const matchRegion = (u.currentRegion.toLowerCase() === currentUser.targetRegion.toLowerCase()) &&
+                                    (u.targetRegion.toLowerCase() === currentUser.currentRegion.toLowerCase());
+
+                let matchSub = true;
+                if (currentUser.kada.includes('Ualimu') && currentUser.sub1) {
+                    matchSub = (u.sub1.toLowerCase() === currentUser.sub1.toLowerCase()) || 
+                               (u.sub2 && u.sub2.toLowerCase() === currentUser.sub1.toLowerCase());
+                }
+
+                return matchKada && matchRegion && matchSub;
+            });
+
+            document.getElementById('dashMatchCount').innerText = matches.length;
+            const grid = document.getElementById('dashMatchesGrid');
+            grid.innerHTML = '';
+
+            if (matches.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white p-8 rounded-xl text-center border text-slate-500">
+                        <i class="fa-solid fa-user-slash text-3xl mb-2 text-slate-300"></i>
+                        <p class="font-bold text-sm">Bado hakuna mtumishi aliyepatikana anayematch nawe kwa 100%.</p>
+                        <p class="text-xs text-slate-400 mt-1">Taarifa zako zimesajiliwa vizuri. Mtu wa kada yako anayetaka kuja kituo chako akijisajili atatokea hapa!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            matches.forEach(m => {
+                const canSeePhone = currentUser.paid;
+                const subjectsText = m.sub1 ? `<p class="text-xs text-slate-500"><strong>Masomo:</strong> ${m.sub1} ${m.sub2 ? '/ '+m.sub2 : ''}</p>` : '';
+
+                grid.innerHTML += `
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2 py-0.5 rounded border border-emerald-100">${m.kada}</span>
+                                <span class="text-[11px] text-slate-400 font-medium">${m.years} Yrs Kazini</span>
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-base mb-1">${m.name}</h4>
+                            ${subjectsText}
+
+                            <div class="my-3 p-2.5 bg-slate-50 rounded-lg text-xs space-y-1">
+                                <p class="text-slate-600"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i> <strong>Sasa Yupo:</strong> ${m.currentRegion} (${m.currentDistrict})</p>
+                                <p class="text-emerald-700 font-medium"><i class="fa-solid fa-route text-emerald-600 mr-1"></i> <strong>Anataka Kwenda:</strong> ${m.targetRegion}</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-100">
+                            ${canSeePhone ? `
+                                <div class="space-y-2">
+                                    <p class="text-xs font-bold text-emerald-700 bg-emerald-50 p-2 rounded text-center">
+                                        <i class="fa-solid fa-phone mr-1"></i> ${m.phone}
+                                    </p>
+                                    <a href="https://wa.me/255${m.phone.replace(/^0/, '')}?text=Habari\%20${encodeURIComponent(m.name)},%20nimeona%20taarifa%20zako%20Utumishi%20Swap." target="_blank" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1 shadow transition">
+                                        <i class="fa-brands fa-whatsapp text-sm"></i> Anzisha Chat WhatsApp
+                                    </a>
+                                </div>
+                            ` : `
+                                <button onclick="openPaymentModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1 shadow transition">
+                                    <i class="fa-solid fa-lock text-amber-400 mr-1"></i> Lipia TZS 2,000 Kuona Namba
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function populateProfile() {
+            if (!currentUser) return;
+            document.getElementById('profName').value = currentUser.name;
+            document.getElementById('profPhone').value = currentUser.phone;
+            document.getElementById('profCurrentReg').value = currentUser.currentRegion;
+            loadDistricts('profCurrentReg', 'profCurrentDist');
+            document.getElementById('profCurrentDist').value = currentUser.currentDistrict;
+
+            document.getElementById('profTargetReg').value = currentUser.targetRegion;
+            loadDistricts('profTargetReg', 'profTargetDist');
+            document.getElementById('profTargetDist').value = currentUser.targetDistrict;
+        }
+
+        function handleUpdateProfile(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            currentUser.name = document.getElementById('profName').value;
+            currentUser.phone = document.getElementById('profPhone').value;
+            currentUser.currentRegion = document.getElementById('profCurrentReg').value;
+            currentUser.currentDistrict = document.getElementById('profCurrentDist').value;
+            currentUser.targetRegion = document.getElementById('profTargetReg').value;
+            currentUser.targetDistrict = document.getElementById('profTargetDist').value;
+
+            alert("Taarifa zako zimesasishwa (Updated) kikamilifu!");
+            renderDashboard();
+            navigate('dashboardView');
+        }
+
+        function openPaymentModal() {
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+        function submitPayment() {
+            const code = document.getElementById('payTxCode').value.trim();
+            if (!code) {
+                alert("Tafadhali ingiza namba ya muamala kwanza.");
+                return;
+            }
+            if (currentUser) {
+                currentUser.paid = true;
+                renderDashboard();
+                closeModal();
+                alert("Malipo yako yamethibitishwa! Mawasiliano yote sasa yako wazi.");
+            }
+        }
+
+        // AUTOMATIC M-PESA SMS PARSER ENGINE (0755154363 LINKED)
+        function processIncomingMpesaSms(smsText) {
+            console.log("SMS Gateway Incoming:", smsText);
+
+            // RegEx Parser kwa ajili ya M-Pesa SMS
+            const txMatch = smsText.match(/([A-Z0-9]{10})/); // Transaction ID
+            const amountMatch = smsText.match(/TZS\s*([\d,]+(?:\.\d{2})?)/); // Amount
+            const phoneMatch = smsText.match(/(?:kutoka kwa|from)\s*(?:255|0)?(\d{9})/); // Phone
+
+            if (txMatch && amountMatch) {
+                const txCode = txMatch[1];
+                const amount = parseFloat(amountMatch[1].replace(/,/g, ''));
+                const phone = phoneMatch ? "0" + phoneMatch[1] : null;
+
+                if (amount >= 2000) {
+                    // Tafuta Mtumishi kwa Phone au TxCode
+                    let targetUser = users.find(u => u.phone === phone) || currentUser;
+
+                    if (targetUser) {
+                        targetUser.paid = true;
+                        if (currentUser && currentUser.id === targetUser.id) {
+                            renderDashboard();
+                        }
+                        alert(`[AUTOMATIC SMS MATCHED] Malipo ya TZS ${amount} kutoka M-Pesa (${txCode}) yapokelewa! Akaunti ya ${targetUser.name} sasa ni VIP ACTIVE!`);
+                        return true;
+                    }
+                }
+            }
+            alert("SMS haijafanikiwa ku-match. Hakikisha kiasi ni TZS 2,000 na namba ya mpokeaji ni sahihi.");
+            return false;
+        }
+
+        function simulateIncomingMpesaSms() {
+            const text = document.getElementById('simulatedSms').value;
+            if (!text) {
+                alert("Weka mfano wa SMS ya M-Pesa!");
+                return;
+            }
+            processIncomingMpesaSms(text);
+        }
+
+        function loginAdmin() {
+            const u = document.getElementById('adminUser').value.trim();
+            const p = document.getElementById('adminPass').value.trim();
+
+            if (u === "eprazil@gmail.com" && p === "1995") {
+                document.getElementById('adminLoginForm').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                renderAdminDashboard();
+            } else {
+                alert("Username au Password za Admin si sahihi!");
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('adminLoginForm').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+        }
+
+        function renderAdminDashboard() {
+            document.getElementById('statTotalUsers').innerText = users.length;
+            const paidCount = users.filter(u => u.paid).length;
+            document.getElementById('statPaidUsers').innerText = paidCount;
+            document.getElementById('statEarnings').innerText = `TZS ${(paidCount * 2000).toLocaleString()}`;
+
+            const tbody = document.getElementById('adminUserTable');
+            tbody.innerHTML = '';
+
+            users.forEach(u => {
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2 font-bold">${u.name}</td>
+                        <td class="p-2">${u.email}</td>
+                        <td class="p-2">${u.phone}</td>
+                        <td class="p-2">${u.kada}</td>
+                        <td class="p-2">${u.currentRegion}</td>
+                        <td class="p-2">${u.targetRegion}</td>
+                        <td class="p-2">
+                            ${u.paid ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-bold">VIP PAID</span>` : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">FREE</span>`}
+                        </td>
+                        <td class="p-2">
+                            ${!u.paid ? `<button onclick="adminApprovePay(${u.id})" class="bg-emerald-600 text-white text-[10px] px-2 py-1 rounded font-bold hover:bg-emerald-700">Thibitisha Paid</button>` : `<span class="text-xs text-slate-400 font-medium">Verified</span>`}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function adminApprovePay(userId) {
+            const user = users.find(u => u.id === userId);
+            if (user) {
+                user.paid = true;
+                renderAdminDashboard();
+                if (currentUser && currentUser.id === userId) {
+                    renderDashboard();
+                }
+            }
+        }
+
+        function postComment(e) {
+            e.preventDefault();
+            const text = document.getElementById('cmtText').value;
+            const author = currentUser ? currentUser.name : "Mtumishi";
+
+            const feed = document.getElementById('commentsFeed');
+            feed.innerHTML = `
+                <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-xs text-slate-800">${author}</span>
+                        <span class="text-[10px] text-slate-400">Sasa hivi</span>
+                    </div>
+                    <p class="text-xs text-slate-600">${text}</p>
+                </div>
+            ` + feed.innerHTML;
+
+            document.getElementById('cmtText').value = '';
+        }
+
+        initRegions();
+    </script>
+</body>
+</html>
