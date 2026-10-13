@@ -88,7 +88,12 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Password (Nenosiri) *</label>
-                                <input type="password" id="signPass" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                <div class="relative">
+                                    <input type="password" id="signPass" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500 pr-10">
+                                    <button type="button" onclick="togglePasswordVisibility('signPass', 'signPassEye')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                                        <i id="signPassEye" class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -189,7 +194,12 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Password (Nenosiri) *</label>
-                                <input type="password" id="loginPass" required placeholder="••••••••" class="w-full px-3 py-2.5 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                <div class="relative">
+                                    <input type="password" id="loginPass" required placeholder="••••••••" class="w-full px-3 py-2.5 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500 pr-10">
+                                    <button type="button" onclick="togglePasswordVisibility('loginPass', 'loginPassEye')" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+                                        <i id="loginPassEye" class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                             <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-lg text-sm shadow transition">
                                 Ingia Kwenye Mfumo (Login)
@@ -302,7 +312,12 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-                    <input type="password" id="adminPass" placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                    <div class="relative">
+                        <input type="password" id="adminPass" placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500 pr-10">
+                        <button type="button" onclick="togglePasswordVisibility('adminPass', 'adminPassEye')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                            <i id="adminPassEye" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <button onclick="loginAdmin()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2 rounded-lg text-sm transition">
                     Ingia Kwenye Mfumo wa Admin
@@ -431,6 +446,21 @@
             "Manyara": ["Babati Mjini", "Hanang", "Kiteto", "Mbulu", "Simanjiro"]
         };
 
+        // Toggle Password Eye Visibility
+        function togglePasswordVisibility(inputId, eyeIconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(eyeIconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+
         function getCurrentUser() {
             return JSON.parse(localStorage.getItem('utumishi_current_user'));
         }
@@ -543,7 +573,7 @@
             navigate('authView');
         }
 
-        // Load Dashboard & Match Logic from Supabase Central DB
+        // Load Dashboard & Flexible Broad Match Logic from Supabase
         async function loadDashboard() {
             const user = getCurrentUser();
             if(!user) return;
@@ -564,21 +594,24 @@
             const { data: users, error } = await _supabase.from('users').select('*');
             if (error || !users) return;
 
+            // FLEXIBLE MATCHING LOGIC
             let matches = users.filter(other => {
-                if(other.email === user.email) return false;
+                if(other.email.toLowerCase() === user.email.toLowerCase()) return false;
                 if(other.kada !== user.kada) return false;
 
-                let regionMatch = (other.current_region.toLowerCase() === user.target_region.toLowerCase()) && 
+                // Broad Region Matching: Either exact 2-way match, or 1-way regional interest
+                let regionMatch = (other.current_region.toLowerCase() === user.target_region.toLowerCase()) || 
                                   (other.target_region.toLowerCase() === user.current_region.toLowerCase());
 
                 if(!regionMatch) return false;
 
+                // Teachers Subject Match: At least ONE common subject matches if provided
                 if(user.kada.includes('Ualimu')) {
-                    let uSubs = [user.sub1.toLowerCase(), user.sub2.toLowerCase()].filter(s => s.length > 0);
-                    let oSubs = [other.sub1.toLowerCase(), other.sub2.toLowerCase()].filter(s => s.length > 0);
+                    let uSubs = [user.sub1, user.sub2].map(s => (s || '').trim().toLowerCase()).filter(s => s.length > 0);
+                    let oSubs = [other.sub1, other.sub2].map(s => (s || '').trim().toLowerCase()).filter(s => s.length > 0);
                     
                     if(uSubs.length > 0 && oSubs.length > 0) {
-                        let hasCommonSub = uSubs.some(s => oSubs.includes(s));
+                        let hasCommonSub = uSubs.some(s => oSubs.some(os => os.includes(s) || s.includes(os)));
                         if(!hasCommonSub) return false;
                     }
                 }
@@ -591,7 +624,7 @@
             grid.innerHTML = '';
 
             if(matches.length === 0) {
-                grid.innerHTML = `<div class="col-span-full bg-white p-6 rounded-xl text-center text-slate-500 text-sm border">Hakuna mtumishi aliyepatikana kwa sasa anayefanana na vigezo na masomo yako. Tafadhali subiri wengine wajisajili au sasisha mkoa unaotaka.</div>`;
+                grid.innerHTML = `<div class="col-span-full bg-white p-6 rounded-xl text-center text-slate-500 text-sm border">Hakuna mtumishi aliyepatikana kwa sasa anayefanana na vigezo au masomo yako. Tafadhali subiri wengine wajisajili au sasisha mkoa unaotaka.</div>`;
                 return;
             }
 
