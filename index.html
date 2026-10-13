@@ -501,7 +501,6 @@
             }
         }
 
-        // Dummy Local App State & Functions placeholder
         function navigate(viewId) {
             ['authView', 'dashboardView', 'profileView', 'commentsView', 'adminView'].forEach(v => {
                 document.getElementById(v).classList.add('hidden');
@@ -518,7 +517,7 @@
         function logoutUser() { navigate('authView'); }
         function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('paymentModal').classList.add('hidden'); }
-        function submitPayment() { alert('Malipo yametum валиdation!'); closeModal(); }
+        function submitPayment() { alert('Malipo yamethibitishwa!'); closeModal(); }
         function simulateIncomingMpesaSms() { alert('SMS imesomwa kiotomatiki!'); }
 
         window.onload = function() {
