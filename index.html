@@ -292,16 +292,16 @@
 
         <!-- ================= PAGE 5: ADMIN PANEL ================= -->
         <div id="adminView" class="hidden space-y-6">
-            <!-- Admin Login Box (Zilizotumika Asili: admin / admin123) -->
+            <!-- Admin Login Box (Username: eprazil@gmail.com | Password: 1995) -->
             <div id="adminLoginForm" class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
                 <h3 class="text-lg font-bold text-slate-800 text-center"><i class="fa-solid fa-user-shield text-emerald-600 mr-1"></i> Admin Login</h3>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Username / Email</label>
-                    <input type="text" id="adminUser" placeholder="Weka Admin Username" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="text" id="adminUser" placeholder="eprazil@gmail.com" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-                    <input type="password" id="adminPass" placeholder="Weka Admin Password" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="password" id="adminPass" placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <button onclick="loginAdmin()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2 rounded-lg text-sm transition">
                     Ingia Kwenye Mfumo wa Admin
@@ -423,7 +423,7 @@
             "Manyara": ["Babati Mjini", "Hanang", "Kiteto", "Mbulu", "Simanjiro"]
         };
 
-        // Mock Database Storage using localStorage
+        // Storage Engine using localStorage
         function getUsers() {
             let users = JSON.parse(localStorage.getItem('utumishi_users')) || [
                 { email: "mwl.juma@gmail.com", pass: "12345", name: "Mwl. Juma Ally", phone: "0712345678", kada: "Ualimu - Sekondari", years: "5", sub1: "Mathematics", sub2: "Physics", currentReg: "Mbeya", currentDist: "Mbeya Jiji", targetReg: "Dar es Salaam", targetDist: "Ilala", paid: false },
@@ -445,7 +445,6 @@
             localStorage.setItem('utumishi_current_user', JSON.stringify(user));
         }
 
-        // Initialize Select Dropdowns
         function populateRegions() {
             const regSelectors = ['signCurrentRegion', 'signTargetRegion', 'profCurrentReg', 'profTargetReg'];
             regSelectors.forEach(id => {
@@ -551,7 +550,6 @@
             navigate('authView');
         }
 
-        // Dashboard Logic & Matching Rule with Subject Check
         function loadDashboard() {
             const user = getCurrentUser();
             if(!user) return;
@@ -568,7 +566,6 @@
                 badge.innerText = "Account Status: FREE";
             }
 
-            // Find Matches
             let users = getUsers();
             let matches = users.filter(other => {
                 if(other.email === user.email) return false;
@@ -579,7 +576,6 @@
 
                 if(!regionMatch) return false;
 
-                // Subject matching rule for teachers (at least 1 subject must match)
                 if(user.kada.includes('Ualimu')) {
                     let uSubs = [user.sub1.toLowerCase(), user.sub2.toLowerCase()].filter(s => s.length > 0);
                     let oSubs = [other.sub1.toLowerCase(), other.sub2.toLowerCase()].filter(s => s.length > 0);
@@ -630,7 +626,6 @@
             });
         }
 
-        // Profile Update
         function loadProfileForm() {
             const user = getCurrentUser();
             if(!user) return;
@@ -664,7 +659,6 @@
             navigate('dashboardView');
         }
 
-        // Comments System
         function postComment(e) {
             e.preventDefault();
             const text = document.getElementById('cmtText').value.trim();
@@ -686,22 +680,25 @@
             alert('Maoni yako yametumwa vizuri!');
         }
 
-        // Admin Management Panel
+        // Admin Auth Logic (eprazil@gmail.com / 1995)
         function loginAdmin() {
             const u = document.getElementById('adminUser').value.trim();
-            const p = document.getElementById('adminPass').value;
-            if(u === 'admin' && p === 'admin123') {
+            const p = document.getElementById('adminPass').value.trim();
+
+            if(u === 'eprazil@gmail.com' && p === '1995') {
                 document.getElementById('adminLoginForm').classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
                 loadAdminData();
             } else {
-                alert('Username au Password ya Admin si sahihi! (Tumia: admin / admin123)');
+                alert('Username au Password ya Admin si sahihi!');
             }
         }
 
         function logoutAdmin() {
             document.getElementById('adminDashboard').classList.add('hidden');
             document.getElementById('adminLoginForm').classList.remove('hidden');
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
         }
 
         function loadAdminData() {
@@ -729,7 +726,6 @@
             });
         }
 
-        // Payment Modal & Automatic Approval simulation
         function openPaymentModal() {
             document.getElementById('paymentModal').classList.remove('hidden');
         }
@@ -746,12 +742,14 @@
             }
 
             let user = getCurrentUser();
-            user.paid = true;
-            setCurrentUser(user);
+            if(user) {
+                user.paid = true;
+                setCurrentUser(user);
 
-            let users = getUsers();
-            users = users.map(u => u.email === user.email ? user : u);
-            saveUsers(users);
+                let users = getUsers();
+                users = users.map(u => u.email === user.email ? user : u);
+                saveUsers(users);
+            }
 
             closeModal();
             alert('Malipo yamethibitishwa kikamilifu! Sasa unaweza kuona namba za simu na kuchat WhatsApp.');
