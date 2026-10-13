@@ -3,7 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Utumishi Swap - Mfumo wa Kubadilishana Vituo vya Kazi</title>
+    
+    <!-- SEO Meta Tags za Kuisaidia Google Kuisoma na Kuonyesha Tovuti Yako -->
+    <title>Utumishi Swap - Mfumo wa Kubadilishana Vituo vya Kazi Utumishi wa Umma Tanzania</title>
+    <meta name="description" content="Utumishi Swap ni mfumo rasmi wa kulinganisha na kubadilishana vituo vya kazi kwa watumishi wa umma Tanzania (Walimu, Afya, Kilimo, na Utawala). Tafuta mtumishi mwenzako wa kubadilishana naye kituo kwa urahisi.">
+    <meta name="keywords" content="Utumishi Swap, ESS Utumishi, Uhamisho wa kubadilishana, Walimu swap Tanzania, TAMISEMI swap, Vituo vya kazi utumishi, kubadilishana vituo vya kazi, Mwalimu swap, Afya swap, Utumishi Tanzania">
+    <meta name="author" content="Utumishi Swap">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph Meta Tags (Inasaidia link ionekane vizuri ikiwa na picha/maelezo ikisambazwa WhatsApp na Facebook) -->
+    <meta property="og:title" content="Utumishi Swap - Mfumo wa Kubadilishana Vituo vya Kazi">
+    <meta property="og:description" content="Tafuta mtumishi mwenzako wa kubadilishana naye kituo cha kazi Utumishi wa Umma Tanzania (Walimu, Afya, Kilimo).">
+    <meta property="og:type" content="website">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -428,7 +440,6 @@
 
     <!-- JavaScript Application & Gateway Logic -->
     <script>
-        // Mikoa & Wilaya Data Store
         const tanzaniaRegions = {
             "Dar es Salaam": ["Kinondoni", "Ilala", "Temeke", "Ubungo", "Kigamboni"],
             "Dodoma": ["Dodoma Mjini", "Bahi", "Chamwino", "Chemba", "Kondoa", "Kongwa", "Mpwapwa"],
@@ -482,7 +493,6 @@
             }
         }
 
-        // Global State
         let currentUser = null;
         let users = [
             {
@@ -741,14 +751,12 @@
             }
         }
 
-        // AUTOMATIC M-PESA SMS PARSER ENGINE (0755154363 LINKED)
         function processIncomingMpesaSms(smsText) {
             console.log("SMS Gateway Incoming:", smsText);
 
-            // RegEx Parser kwa ajili ya M-Pesa SMS
-            const txMatch = smsText.match(/([A-Z0-9]{10})/); // Transaction ID
-            const amountMatch = smsText.match(/TZS\s*([\d,]+(?:\.\d{2})?)/); // Amount
-            const phoneMatch = smsText.match(/(?:kutoka kwa|from)\s*(?:255|0)?(\d{9})/); // Phone
+            const txMatch = smsText.match(/([A-Z0-9]{10})/);
+            const amountMatch = smsText.match(/TZS\s*([\d,]+(?:\.\d{2})?)/);
+            const phoneMatch = smsText.match(/(?:kutoka kwa|from)\s*(?:255|0)?(\d{9})/);
 
             if (txMatch && amountMatch) {
                 const txCode = txMatch[1];
@@ -756,7 +764,6 @@
                 const phone = phoneMatch ? "0" + phoneMatch[1] : null;
 
                 if (amount >= 2000) {
-                    // Tafuta Mtumishi kwa Phone au TxCode
                     let targetUser = users.find(u => u.phone === phone) || currentUser;
 
                     if (targetUser) {
