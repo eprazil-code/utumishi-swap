@@ -292,16 +292,16 @@
 
         <!-- ================= PAGE 5: ADMIN PANEL ================= -->
         <div id="adminView" class="hidden space-y-6">
-            <!-- Admin Login Box -->
+            <!-- Admin Login Box (Zilizotumika Asili: admin / admin123) -->
             <div id="adminLoginForm" class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
                 <h3 class="text-lg font-bold text-slate-800 text-center"><i class="fa-solid fa-user-shield text-emerald-600 mr-1"></i> Admin Login</h3>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Username / Email</label>
-                    <input type="text" id="adminUser" placeholder="Weka Admin Username" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500" value="admin">
+                    <input type="text" id="adminUser" placeholder="Weka Admin Username" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-                    <input type="password" id="adminPass" placeholder="Weka Admin Password" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500" value="admin123">
+                    <input type="password" id="adminPass" placeholder="Weka Admin Password" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <button onclick="loginAdmin()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2 rounded-lg text-sm transition">
                     Ingia Kwenye Mfumo wa Admin
@@ -574,8 +574,6 @@
                 if(other.email === user.email) return false;
                 if(other.kada !== user.kada) return false;
 
-                // Mutual match condition: Other person is currently in target region/district OR near, 
-                // and wants where current user is.
                 let regionMatch = (other.currentReg.toLowerCase() === user.targetReg.toLowerCase()) && 
                                   (other.targetReg.toLowerCase() === user.currentReg.toLowerCase());
 
@@ -690,14 +688,14 @@
 
         // Admin Management Panel
         function loginAdmin() {
-            const u = document.getElementById('adminUser').value;
+            const u = document.getElementById('adminUser').value.trim();
             const p = document.getElementById('adminPass').value;
             if(u === 'admin' && p === 'admin123') {
                 document.getElementById('adminLoginForm').classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
                 loadAdminData();
             } else {
-                alert('Username au Password ya Admin si sahihi!');
+                alert('Username au Password ya Admin si sahihi! (Tumia: admin / admin123)');
             }
         }
 
