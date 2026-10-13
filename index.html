@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- SEO Meta Tags & Google Search Console Verification Tag -->
+    <!-- SEO Meta Tags & Search Console Tag -->
     <title>Utumishi Swap - Mfumo wa Kubadilishana Vituo vya Kazi Utumishi wa Umma</title>
     <meta name="google-site-verification" content="Np-VA5zJvnrY7bsmivrMAaDOOhXHZhu-Vnjj46f_zqQ" />
     <meta name="description" content="Utumishi Swap ni mfumo rasmi wa kulinganisha na kubadilishana vituo vya kazi kwa watumishi wa umma Tanzania.">
-    <meta name="keywords" content="Utumishi Swap, ESS Utumishi, Uhamisho wa kubadilishana, Walimu swap Tanzania, TAMISEMI swap">
-    <meta name="robots" content="index, follow">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase JS Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
 
@@ -311,7 +312,7 @@
             <!-- Admin Dashboard Content -->
             <div id="adminDashboard" class="hidden space-y-6">
                 <div class="flex justify-between items-center bg-slate-900 text-white p-4 rounded-xl">
-                    <h2 class="font-bold text-lg">Admin Management Dashboard (Watumishi Waliojisajili)</h2>
+                    <h2 class="font-bold text-lg">Admin Management Dashboard (Watumishi Waliojisajili Live)</h2>
                     <button onclick="logoutAdmin()" class="bg-red-600 text-xs px-3 py-1.5 rounded font-bold hover:bg-red-700">Log Out Admin</button>
                 </div>
 
@@ -331,7 +332,7 @@
                 </div>
 
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
-                    <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha Kamili ya Watumishi Walio-log in / Waliojisajili</h3>
+                    <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha Kamili ya Watumishi (Kutoka Supabase Database)</h3>
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-100 text-slate-600 border-b">
                             <tr>
@@ -392,8 +393,15 @@
         </div>
     </footer>
 
-    <!-- JavaScript Application Logic -->
+    <!-- JavaScript Application Logic & Supabase Integration -->
     <script>
+        // SUPABASE URL NA ANON KEY ZAKO SAHIHI ZILIZOWEKWA:
+        const SUPABASE_URL = "https://pbkengmawoabssqknwiu.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_QJ2v777k9XfSKVzlzRSTOQ_MrGd8yYY"; 
+
+        // Connect to Supabase Backend
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const tanzaniaRegions = {
             "Dar es Salaam": ["Kinondoni", "Ilala", "Temeke", "Ubungo", "Kigamboni"],
             "Dodoma": ["Dodoma Mjini", "Bahi", "Chamwino", "Chemba", "Kondoa", "Kongwa", "Mpwapwa"],
@@ -422,20 +430,6 @@
             "Geita": ["Geita Mjini", "Chato", "Mbogwe", "Nyang'hwale", "Bukombe"],
             "Manyara": ["Babati Mjini", "Hanang", "Kiteto", "Mbulu", "Simanjiro"]
         };
-
-        // Storage Engine using localStorage
-        function getUsers() {
-            let users = JSON.parse(localStorage.getItem('utumishi_users')) || [
-                { email: "mwl.juma@gmail.com", pass: "12345", name: "Mwl. Juma Ally", phone: "0712345678", kada: "Ualimu - Sekondari", years: "5", sub1: "Mathematics", sub2: "Physics", currentReg: "Mbeya", currentDist: "Mbeya Jiji", targetReg: "Dar es Salaam", targetDist: "Ilala", paid: false },
-                { email: "mwl.amina@gmail.com", pass: "12345", name: "Mwl. Amina Hassan", phone: "0788112233", kada: "Ualimu - Sekondari", years: "3", sub1: "Mathematics", sub2: "Chemistry", currentReg: "Dar es Salaam", currentDist: "Ilala", targetReg: "Mbeya", targetDist: "Mbeya Jiji", paid: true },
-                { email: "dr.john@gmail.com", pass: "12345", name: "Dr. John Mwakyusa", phone: "0755998877", kada: "Afya - Tabibu / Daktari", years: "7", sub1: "", sub2: "", currentReg: "Arusha", currentDist: "Arusha Mjini", targetReg: "Dodoma", targetDist: "Dodoma Mjini", paid: false }
-            ];
-            return users;
-        }
-
-        function saveUsers(users) {
-            localStorage.setItem('utumishi_users', JSON.stringify(users));
-        }
 
         function getCurrentUser() {
             return JSON.parse(localStorage.getItem('utumishi_current_user'));
@@ -499,45 +493,44 @@
             if(viewId === 'adminView') loadAdminData();
         }
 
-        function handleSignup(e) {
+        // Signup User to Supabase Cloud Database
+        async function handleSignup(e) {
             e.preventDefault();
             const email = document.getElementById('signEmail').value.trim();
             const pass = document.getElementById('signPass').value;
             const name = document.getElementById('signName').value.trim();
             const phone = document.getElementById('signPhone').value.trim();
             const kada = document.getElementById('signKada').value;
-            const years = document.getElementById('signYears').value;
+            const years = parseInt(document.getElementById('signYears').value) || 0;
             const sub1 = document.getElementById('signSub1').value.trim();
             const sub2 = document.getElementById('signSub2').value.trim();
-            const currentReg = document.getElementById('signCurrentRegion').value;
-            const currentDist = document.getElementById('signCurrentDistrict').value;
-            const targetReg = document.getElementById('signTargetRegion').value;
-            const targetDist = document.getElementById('signTargetDistrict').value;
+            const current_region = document.getElementById('signCurrentRegion').value;
+            const current_district = document.getElementById('signCurrentDistrict').value;
+            const target_region = document.getElementById('signTargetRegion').value;
+            const target_district = document.getElementById('signTargetDistrict').value;
 
-            let users = getUsers();
-            if(users.some(u => u.email === email)) {
-                alert('Email hii tayari imesajiliwa. Tafadhali ingia (Login).');
-                return;
+            const { data, error } = await _supabase.from('users').insert([
+                { email, pass, name, phone, kada, years, sub1, sub2, current_region, current_district, target_region, target_district, paid: false }
+            ]);
+
+            if (error) {
+                alert("Makosa katika usajili: " + error.message);
+            } else {
+                alert('Usajili wako umekamilika kikamilifu na umehifadhiwa mtandaoni! Sasa unaweza kuingia (Login).');
+                document.getElementById('signupForm').reset();
             }
-
-            const newUser = { email, pass, name, phone, kada, years, sub1, sub2, currentReg, currentDist, targetReg, targetDist, paid: false };
-            users.push(newUser);
-            saveUsers(users);
-
-            alert('Usajili umemekamilika kikamilifu! Sasa unaweza kuingia.');
-            document.getElementById('signupForm').reset();
         }
 
-        function handleLogin(e) {
+        // Login User from Supabase
+        async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPass').value;
 
-            let users = getUsers();
-            const user = users.find(u => u.email === email && u.pass === pass);
+            const { data, error } = await _supabase.from('users').select('*').eq('email', email).eq('pass', pass).single();
 
-            if(user) {
-                setCurrentUser(user);
+            if (data) {
+                setCurrentUser(data);
                 navigate('dashboardView');
             } else {
                 alert('Email au Nenosiri sio sahihi. Tafadhali jaribu tena.');
@@ -550,12 +543,13 @@
             navigate('authView');
         }
 
-        function loadDashboard() {
+        // Load Dashboard & Match Logic from Supabase Central DB
+        async function loadDashboard() {
             const user = getCurrentUser();
             if(!user) return;
 
             document.getElementById('dashWelcomeName').innerText = `Karibu, ${user.name}!`;
-            document.getElementById('dashUserSummary').innerText = `Kada: ${user.kada} | Uliopo: ${user.currentReg} (${user.currentDist}) ➔ Unataka: ${user.targetReg} (${user.targetDist})`;
+            document.getElementById('dashUserSummary').innerText = `Kada: ${user.kada} | Uliopo: ${user.current_region} (${user.current_district}) ➔ Unataka: ${user.target_region} (${user.target_district})`;
             
             const badge = document.getElementById('dashPaidBadge');
             if(user.paid) {
@@ -566,13 +560,16 @@
                 badge.innerText = "Account Status: FREE";
             }
 
-            let users = getUsers();
+            // Fetch All Users from Supabase
+            const { data: users, error } = await _supabase.from('users').select('*');
+            if (error || !users) return;
+
             let matches = users.filter(other => {
                 if(other.email === user.email) return false;
                 if(other.kada !== user.kada) return false;
 
-                let regionMatch = (other.currentReg.toLowerCase() === user.targetReg.toLowerCase()) && 
-                                  (other.targetReg.toLowerCase() === user.currentReg.toLowerCase());
+                let regionMatch = (other.current_region.toLowerCase() === user.target_region.toLowerCase()) && 
+                                  (other.target_region.toLowerCase() === user.current_region.toLowerCase());
 
                 if(!regionMatch) return false;
 
@@ -613,8 +610,8 @@
                         </div>
                         <div class="space-y-1 text-xs text-slate-600">
                             <p><strong class="text-slate-800">Jina:</strong> ${m.name}</p>
-                            <p><strong class="text-slate-800">Yupo Sasa:</strong> ${m.currentReg} (${m.currentDist})</p>
-                            <p><strong class="text-slate-800">Anataka Kwenda:</strong> ${m.targetReg} (${m.targetDist})</p>
+                            <p><strong class="text-slate-800">Yupo Sasa:</strong> ${m.current_region} (${m.current_district})</p>
+                            <p><strong class="text-slate-800">Anataka Kwenda:</strong> ${m.target_region} (${m.target_district})</p>
                             ${m.sub1 ? `<p><strong class="text-slate-800">Masomo:</strong> ${m.sub1}${m.sub2 ? ', '+m.sub2 : ''}</p>` : ''}
                             <p class="pt-2">${contactDisplay}</p>
                         </div>
@@ -624,60 +621,6 @@
                     </div>
                 `;
             });
-        }
-
-        function loadProfileForm() {
-            const user = getCurrentUser();
-            if(!user) return;
-            populateRegions();
-            document.getElementById('profName').value = user.name;
-            document.getElementById('profPhone').value = user.phone;
-            document.getElementById('profCurrentReg').value = user.currentReg;
-            loadDistricts('profCurrentReg', 'profCurrentDist');
-            document.getElementById('profCurrentDist').value = user.currentDist;
-            document.getElementById('profTargetReg').value = user.targetReg;
-            loadDistricts('profTargetReg', 'profTargetDist');
-            document.getElementById('profTargetDist').value = user.targetDist;
-        }
-
-        function handleUpdateProfile(e) {
-            e.preventDefault();
-            let user = getCurrentUser();
-            user.name = document.getElementById('profName').value;
-            user.phone = document.getElementById('profPhone').value;
-            user.currentReg = document.getElementById('profCurrentReg').value;
-            user.currentDist = document.getElementById('profCurrentDist').value;
-            user.targetReg = document.getElementById('profTargetReg').value;
-            user.targetDist = document.getElementById('profTargetDist').value;
-
-            setCurrentUser(user);
-            let users = getUsers();
-            users = users.map(u => u.email === user.email ? user : u);
-            saveUsers(users);
-
-            alert('Profile imesasishwa kikamilifu!');
-            navigate('dashboardView');
-        }
-
-        function postComment(e) {
-            e.preventDefault();
-            const text = document.getElementById('cmtText').value.trim();
-            const user = getCurrentUser();
-            const name = user ? user.name : "Mtumishi Mgeni";
-            const feed = document.getElementById('commentsFeed');
-            
-            feed.innerHTML = `
-                <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="font-bold text-xs text-slate-800">${name}</span>
-                        <span class="text-[10px] text-slate-400">Sasa hivi</span>
-                    </div>
-                    <p class="text-xs text-slate-600">${text}</p>
-                </div>
-            ` + feed.innerHTML;
-
-            document.getElementById('cmtText').value = '';
-            alert('Maoni yako yametumwa vizuri!');
         }
 
         // Admin Auth Logic
@@ -701,13 +644,16 @@
             document.getElementById('adminPass').value = '';
         }
 
-        function loadAdminData() {
-            let users = getUsers();
+        // Fetch Real Users Live into Admin Panel
+        async function loadAdminData() {
+            const { data: users, error } = await _supabase.from('users').select('*');
+            if(error || !users) return;
+
             let paidCount = users.filter(u => u.paid).length;
             
             document.getElementById('statTotalUsers').innerText = users.length;
             document.getElementById('statPaidUsers').innerText = paidCount;
-            document.getElementById('statEarnings').innerText = `TZS ${paidCount * 2000}`;
+            document.getElementById('statEarnings').innerText = `TZS ${(paidCount * 2000).toLocaleString()}`;
 
             const tbody = document.getElementById('adminUserTable');
             tbody.innerHTML = '';
@@ -718,8 +664,8 @@
                         <td class="p-2">${u.email}</td>
                         <td class="p-2">${u.phone}</td>
                         <td class="p-2">${u.kada}</td>
-                        <td class="p-2">${u.currentReg}</td>
-                        <td class="p-2">${u.targetReg}</td>
+                        <td class="p-2">${u.current_region}</td>
+                        <td class="p-2">${u.target_region}</td>
                         <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.paid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${u.paid ? 'VIP (Paid)' : 'Free'}</span></td>
                     </tr>
                 `;
@@ -734,7 +680,7 @@
             document.getElementById('paymentModal').classList.add('hidden');
         }
 
-        function submitPayment() {
+        async function submitPayment() {
             const tx = document.getElementById('payTxCode').value.trim();
             if(!tx) {
                 alert('Tafadhali weka namba ya muamala (Transaction ID).');
@@ -746,9 +692,7 @@
                 user.paid = true;
                 setCurrentUser(user);
 
-                let users = getUsers();
-                users = users.map(u => u.email === user.email ? user : u);
-                saveUsers(users);
+                await _supabase.from('users').update({ paid: true }).eq('email', user.email);
             }
 
             closeModal();
