@@ -208,7 +208,7 @@
                     </div>
 
                     <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 mt-6 text-xs text-emerald-800 space-y-1">
-                        <p class="font-bold"><i class="fa-solid fa-robot text-emerald-600 mr-1"></i> Utaratibu wa Malipo:</p>
+                        <p class="font-bold"><i class="fa-solid fa-robot text-emerald-600 mr-1"></i> Automatic Payment Listener:</p>
                         <p>Ukituma TZS 2,000 kwenda <strong>0755 154 363</strong> (Jina: <strong>Edson Mhagama</strong>), weka Transaction ID. Admin atahakiki na kukupa VIP Access mara moja!</p>
                     </div>
                 </div>
@@ -347,7 +347,7 @@
                 </div>
 
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
-                    <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha Kamili ya Watumishi na Mfumo wa Ku-Approve Malipo</h3>
+                    <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha Kamili ya Watumishi na Usimamizi wa Malipo</h3>
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-100 text-slate-600 border-b">
                             <tr>
@@ -357,9 +357,8 @@
                                 <th class="p-2">Kada</th>
                                 <th class="p-2">Mkoa Sasa</th>
                                 <th class="p-2">Mkoa Target</th>
-                                <th class="p-2">Tx ID</th>
-                                <th class="p-2">Hali ya Malipo</th>
-                                <th class="p-2">Kitendo (Action)</th>
+                                <th class="p-2">Hali ya VIP</th>
+                                <th class="p-2">Action</th>
                             </tr>
                         </thead>
                         <tbody id="adminUserTable">
@@ -509,9 +508,11 @@
 
         function navigate(viewId) {
             ['authView', 'dashboardView', 'profileView', 'commentsView', 'adminView'].forEach(v => {
-                document.getElementById(v).classList.add('hidden');
+                const el = document.getElementById(v);
+                if(el) el.classList.add('hidden');
             });
-            document.getElementById(viewId).classList.remove('hidden');
+            const targetEl = document.getElementById(viewId);
+            if(targetEl) targetEl.classList.remove('hidden');
 
             const currentUser = getCurrentUser();
             if(currentUser) {
@@ -522,7 +523,10 @@
                 document.getElementById('appNavLinks').classList.add('hidden');
             }
 
-            if(viewId === 'adminView') loadAdminData();
+            if(viewId === 'adminView') {
+                document.getElementById('adminLoginForm').classList.remove('hidden');
+                document.getElementById('adminDashboard').classList.add('hidden');
+            }
         }
 
         // Signup User to Supabase Cloud Database
@@ -542,7 +546,7 @@
             const target_district = document.getElementById('signTargetDistrict').value;
 
             const { data, error } = await _supabase.from('users').insert([
-                { email, pass, name, phone, kada, years, sub1, sub2, current_region, current_district, target_region, target_district, paid: false, payment_status: 'none' }
+                { email, pass, name, phone, kada, years, sub1, sub2, current_region, current_district, target_region, target_district, paid: false }
             ]);
 
             if (error) {
@@ -594,9 +598,6 @@
             if(user.paid) {
                 badge.className = "bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
                 badge.innerText = "Account Status: VIP ACTIVE";
-            } else if(user.payment_status === 'pending') {
-                badge.className = "bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
-                badge.innerText = "Account Status: MALIPO YANAHAKIKIWANA ADMIN";
             } else {
                 badge.className = "bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
                 badge.innerText = "Account Status: FREE";
@@ -643,14 +644,9 @@
             matches.forEach(m => {
                 let contactDisplay = user.paid ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-phone mr-1"></i> ${m.phone}</span>` : `<span class="text-slate-400 italic"><i class="fa-solid fa-lock mr-1"></i> Namba imefungwa (Lipia TZS 2,000 kuona)</span>`;
                 
-                let actionBtn = "";
-                if(user.paid) {
-                    actionBtn = `<a href="https://wa.me/255${m.phone.replace(/^0+/, '')}" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition"><i class="fa-brands fa-whatsapp mr-1"></i> Chat WhatsApp</a>`;
-                } else if(user.payment_status === 'pending') {
-                    actionBtn = `<div class="bg-blue-50 text-blue-800 text-[11px] p-2 rounded-lg font-bold text-center border border-blue-200"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Tx ID yako inahakikiwa na Admin...</div>`;
-                } else {
-                    actionBtn = `<button onclick="openPaymentModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-lg transition shadow"><i class="fa-solid fa-lock mr-1"></i> Bonyeza Uone Namba & WhatsApp</button>`;
-                }
+                let actionBtn = user.paid ? 
+                    `<a href="https://wa.me/255${m.phone.replace(/^0+/, '')}" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition"><i class="fa-brands fa-whatsapp mr-1"></i> Chat WhatsApp</a>` :
+                    `<button onclick="openPaymentModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-lg transition shadow"><i class="fa-solid fa-lock mr-1"></i> Bonyeza Uone Namba & WhatsApp</button>`;
 
                 grid.innerHTML += `
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
@@ -694,11 +690,83 @@
             document.getElementById('adminPass').value = '';
         }
 
-        // Fetch Real Users Live into Admin Panel with Approval Feature
+        // Fetch Real Users Live into Admin Panel with Direct Approval Actions
         async function loadAdminData() {
             const { data: users, error } = await _supabase.from('users').select('*');
             if(error || !users) return;
 
             let paidCount = users.filter(u => u.paid).length;
             
-            document.getElementById('statTotal
+            document.getElementById('statTotalUsers').innerText = users.length;
+            document.getElementById('statPaidUsers').innerText = paidCount;
+            document.getElementById('statEarnings').innerText = `TZS ${(paidCount * 2000).toLocaleString()}`;
+
+            const tbody = document.getElementById('adminUserTable');
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                let statusBadge = u.paid ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">VIP (Paid)</span>` : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Free</span>`;
+                
+                let actionBtn = u.paid ? 
+                    `<button onclick="toggleUserPaidStatus('${u.email}', false)" class="bg-red-100 text-red-700 hover:bg-red-200 px-2 py-1 rounded text-[10px] font-bold">Revoke VIP</button>` :
+                    `<button onclick="toggleUserPaidStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>`;
+
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2 font-bold">${u.name}</td>
+                        <td class="p-2">${u.email}</td>
+                        <td class="p-2">${u.phone}</td>
+                        <td class="p-2">${u.kada}</td>
+                        <td class="p-2">${u.current_region}</td>
+                        <td class="p-2">${u.target_region}</td>
+                        <td class="p-2">${statusBadge}</td>
+                        <td class="p-2">${actionBtn}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Toggle Status Manual Direct in Database
+        async function toggleUserPaidStatus(email, status) {
+            const { error } = await _supabase.from('users').update({ paid: status }).eq('email', email);
+            if (error) {
+                alert("Makosa katika kusasisha: " + error.message);
+            } else {
+                alert(`Hali ya VIP kwa ${email} imesasishwa kikamilifu kuwa: ${status ? 'ACTIVE (Paid)' : 'FREE'}`);
+                loadAdminData();
+            }
+        }
+
+        function openPaymentModal() {
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+
+        async function submitPayment() {
+            const tx = document.getElementById('payTxCode').value.trim();
+            if(!tx) {
+                alert('Tafadhali weka namba ya muamala (Transaction ID).');
+                return;
+            }
+
+            let user = getCurrentUser();
+            if(user) {
+                user.paid = true;
+                setCurrentUser(user);
+
+                await _supabase.from('users').update({ paid: true }).eq('email', user.email);
+            }
+
+            closeModal();
+            alert('Thibitisho la muamala wako limepokelewa! Sasa unaweza kuona namba za simu na kuchat WhatsApp.');
+            loadDashboard();
+        }
+
+        window.onload = function() {
+            populateRegions();
+        };
+    </script>
+</body>
+</html>
