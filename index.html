@@ -30,7 +30,8 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2 cursor-pointer" onclick="navigate('authView')">
-                <div class="bg-emerald-600 text-white p-2 rounded-lg font-black text-xl">US</div>
+                <img src="logo.jpg" alt="Utumishi Swap Logo" class="h-10 w-auto rounded-lg object-contain shadow-sm border border-slate-100" onerror="this.onerror=null; this.src=''; this.className='hidden'; document.getElementById('fallbackLogo').classList.remove('hidden');">
+                <div id="fallbackLogo" class="hidden bg-emerald-600 text-white p-2 rounded-lg font-black text-xl">US</div>
                 <div>
                     <h1 class="font-bold text-lg leading-none text-slate-900">Utumishi<span class="text-emerald-600">Swap</span></h1>
                     <p class="text-xs text-slate-500">Mfumo wa Kubadilishana Vituo Utumishi</p>
@@ -184,7 +185,7 @@
                     <div>
                         <div class="border-b pb-3 mb-4">
                             <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-right-to-bracket text-emerald-600 mr-2"></i> Kuingia Kwenye Akaunti (Login)</h3>
-                            <p class="text-xs text-slate-500">Weka Email na Password yako hapa ili kuingia kwenye mfumo.</p>
+                            <p class="text-xs text-slate-500">Weka Email na Password yako hapa ili kuingia kwenye mfumo wa kubadilishana vituo.</p>
                         </div>
 
                         <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
@@ -207,9 +208,9 @@
                         </form>
                     </div>
 
-                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 mt-6 text-xs text-emerald-800 space-y-1">
-                        <p class="font-bold"><i class="fa-solid fa-robot text-emerald-600 mr-1"></i> Automatic Payment Listener:</p>
-                        <p>Ukituma TZS 2,000 kwenda <strong>0755 154 363</strong> (Jina: <strong>Edson Mhagama</strong>), weka Transaction ID. Admin atahakiki na kukupa VIP Access mara moja!</p>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-6 text-xs text-slate-600 space-y-1">
+                        <p class="font-bold text-slate-800"><i class="fa-solid fa-circle-info text-emerald-600 mr-1"></i> Mfumo wa Utumishi Swap:</p>
+                        <p>Ukishaingia, mfumo utakutafutia watumishi wenzako wa kada na masomo yako walio tayari kubadilishana vituo na wewe mara moja.</p>
                     </div>
                 </div>
             </div>
@@ -327,7 +328,7 @@
             <!-- Admin Dashboard Content -->
             <div id="adminDashboard" class="hidden space-y-6">
                 <div class="flex justify-between items-center bg-slate-900 text-white p-4 rounded-xl">
-                    <h2 class="font-bold text-lg">Admin Management Dashboard (Watumishi Waliojisajili Live)</h2>
+                    <h2 class="font-bold text-lg">Admin Management Dashboard</h2>
                     <button onclick="logoutAdmin()" class="bg-red-600 text-xs px-3 py-1.5 rounded font-bold hover:bg-red-700">Log Out Admin</button>
                 </div>
 
@@ -346,7 +347,15 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+                <!-- Admin Navigation Tabs -->
+                <div class="flex space-x-2 border-b border-slate-200 pb-2">
+                    <button onclick="switchAdminTab('users')" id="tabBtnUsers" class="px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg">Orodha ya Watumishi</button>
+                    <button onclick="switchAdminTab('matches')" id="tabBtnMatches" class="px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg">Watumishi Wanaomatch (<span id="adminMatchCount">0</span>)</button>
+                    <button onclick="switchAdminTab('searches')" id="tabBtnSearches" class="px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg">Watu Waliotafutana</button>
+                </div>
+
+                <!-- TAB 1: ALL USERS -->
+                <div id="adminTabUsers" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
                     <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha Kamili ya Watumishi na Usimamizi wa Malipo</h3>
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-100 text-slate-600 border-b">
@@ -366,12 +375,55 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- TAB 2: MATCHING USERS OVERVIEW -->
+                <div id="adminTabMatches" class="hidden bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-people-arrows text-emerald-600 mr-2"></i> Pairs za Watumishi Wanaomatch (Ili Kuwatafuta & Kutuma Update)</h3>
+                        <span class="text-xs text-slate-500">Matching Engine Live</span>
+                    </div>
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-600 border-b">
+                            <tr>
+                                <th class="p-2">Mtumishi 1</th>
+                                <th class="p-2">Kada & Masomo</th>
+                                <th class="p-2">Mkoa Sasa ➔ Target</th>
+                                <th class="p-2">Mtumishi 2 (Match)</th>
+                                <th class="p-2">Mkoa Sasa ➔ Target</th>
+                                <th class="p-2">Tuma SMS / WhatsApp Update</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminMatchesTable">
+                            <!-- Matching Pairs via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TAB 3: CONTACTS VIEWED / INTERACTIONS -->
+                <div id="adminTabSearches" class="hidden bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto space-y-3">
+                    <h3 class="font-bold text-sm mb-3 text-slate-800"><i class="fa-solid fa-eye text-emerald-600 mr-2"></i> Watu Waliotafutana & Kuangalia Namba</h3>
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-600 border-b">
+                            <tr>
+                                <th class="p-2">Mtumishi Aliyetafuta</th>
+                                <th class="p-2">Simu Yake</th>
+                                <th class="p-2">Mtumishi Aliyetazamwa</th>
+                                <th class="p-2">Simu Yake</th>
+                                <th class="p-2">Hali ya Malipo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminSearchesTable">
+                            <!-- Interactions via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
 
     </main>
 
-    <!-- Payment Modal -->
+    <!-- Payment Modal (Inatokea TU pale anapotaka kuona namba ya simu) -->
     <div id="paymentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -380,18 +432,18 @@
             </div>
 
             <p class="text-xs text-slate-600">
-                Ili kuwasiliana na mtumishi huyu, tafadhali lipia TZS 2,000 kupitia maelezo hapa chini:
+                Ili kupata namba ya simu na kuwasiliana na mtumishi huyu moja kwa moja, tafadhali tuma TZS 2,000 kupitia maelezo hapa chini:
             </p>
 
             <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs space-y-1">
-                <p class="font-bold text-amber-800"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Namba ya Kulipia:</p>
+                <p class="font-bold text-amber-800"><i class="fa-solid fa-mobile-screen-button mr-1"></i> Namba ya Kulipia M-Pesa:</p>
                 <p class="text-amber-700">Tuma <strong>TZS 2,000</strong> kwenda Vodacom M-Pesa:</p>
                 <p class="text-base font-black text-amber-900 bg-amber-100 p-2 rounded text-center my-1 select-all">0755 154 363</p>
                 <p class="text-amber-700">Jina la Mpokeaji: <strong class="text-emerald-900">EDSON MHAGAMA</strong></p>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Namba ya Muamala (Transaction ID):</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Weka Namba ya Muamala (Transaction ID):</label>
                 <input type="text" id="payTxCode" placeholder="Mf. 9AB87XX..." class="w-full px-3 py-2 border rounded-lg text-sm outline-none uppercase">
             </div>
 
@@ -417,6 +469,8 @@
 
         // Connect to Supabase Backend
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let selectedTargetContactUser = null;
 
         const tanzaniaRegions = {
             "Dar es Salaam": ["Kinondoni", "Ilala", "Temeke", "Ubungo", "Kigamboni"],
@@ -552,7 +606,7 @@
             if (error) {
                 alert("Makosa katika usajili: " + error.message);
             } else {
-                alert('Usajili wako umekamilika kikamilifu na umehifadhiwa mtandaoni! Sasa unaweza kuingia (Login).');
+                alert('Usajili wako umekamilika kikamilifu! Sasa unaweza kuingia (Login) kuona watumishi walio tayari kubadilishana vituo na wewe.');
                 document.getElementById('signupForm').reset();
             }
         }
@@ -612,13 +666,13 @@
                 if(other.email.toLowerCase() === user.email.toLowerCase()) return false;
                 if(other.kada !== user.kada) return false;
 
-                // Broad Region Matching: Either exact 2-way match, or 1-way regional interest
+                // Broad Region Matching
                 let regionMatch = (other.current_region.toLowerCase() === user.target_region.toLowerCase()) || 
                                   (other.target_region.toLowerCase() === user.current_region.toLowerCase());
 
                 if(!regionMatch) return false;
 
-                // Teachers Subject Match: At least ONE common subject matches if provided
+                // Teachers Subject Match
                 if(user.kada.includes('Ualimu')) {
                     let uSubs = [user.sub1, user.sub2].map(s => (s || '').trim().toLowerCase()).filter(s => s.length > 0);
                     let oSubs = [other.sub1, other.sub2].map(s => (s || '').trim().toLowerCase()).filter(s => s.length > 0);
@@ -642,11 +696,11 @@
             }
 
             matches.forEach(m => {
-                let contactDisplay = user.paid ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-phone mr-1"></i> ${m.phone}</span>` : `<span class="text-slate-400 italic"><i class="fa-solid fa-lock mr-1"></i> Namba imefungwa (Lipia TZS 2,000 kuona)</span>`;
+                let contactDisplay = user.paid ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-phone mr-1"></i> ${m.phone}</span>` : `<span class="text-slate-400 italic"><i class="fa-solid fa-lock mr-1"></i> Namba imefungwa</span>`;
                 
                 let actionBtn = user.paid ? 
                     `<a href="https://wa.me/255${m.phone.replace(/^0+/, '')}" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition"><i class="fa-brands fa-whatsapp mr-1"></i> Chat WhatsApp</a>` :
-                    `<button onclick="openPaymentModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-lg transition shadow"><i class="fa-solid fa-lock mr-1"></i> Bonyeza Uone Namba & WhatsApp</button>`;
+                    `<button onclick="triggerPaymentForUser('${m.name}', '${m.email}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-lg transition shadow"><i class="fa-solid fa-lock mr-1"></i> Bonyeza Uone Namba & WhatsApp</button>`;
 
                 grid.innerHTML += `
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
@@ -667,6 +721,11 @@
                     </div>
                 `;
             });
+        }
+
+        function triggerPaymentForUser(targetName, targetEmail) {
+            selectedTargetContactUser = { name: targetName, email: targetEmail };
+            openPaymentModal();
         }
 
         // Admin Auth Logic
@@ -690,7 +749,25 @@
             document.getElementById('adminPass').value = '';
         }
 
-        // Fetch Real Users Live into Admin Panel with Direct Approval Actions
+        function switchAdminTab(tabName) {
+            ['Users', 'Matches', 'Searches'].forEach(t => {
+                document.getElementById('adminTab' + t).classList.add('hidden');
+                document.getElementById('tabBtn' + t).className = "px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg";
+            });
+
+            if(tabName === 'users') {
+                document.getElementById('adminTabUsers').classList.remove('hidden');
+                document.getElementById('tabBtnUsers').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg";
+            } else if(tabName === 'matches') {
+                document.getElementById('adminTabMatches').classList.remove('hidden');
+                document.getElementById('tabBtnMatches').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg";
+            } else if(tabName === 'searches') {
+                document.getElementById('adminTabSearches').classList.remove('hidden');
+                document.getElementById('tabBtnSearches').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg";
+            }
+        }
+
+        // Fetch Real Users Live into Admin Panel with Direct Approval Actions & Matching Analysis
         async function loadAdminData() {
             const { data: users, error } = await _supabase.from('users').select('*');
             if(error || !users) return;
@@ -701,6 +778,7 @@
             document.getElementById('statPaidUsers').innerText = paidCount;
             document.getElementById('statEarnings').innerText = `TZS ${(paidCount * 2000).toLocaleString()}`;
 
+            // TAB 1: USERS TABLE
             const tbody = document.getElementById('adminUserTable');
             tbody.innerHTML = '';
             users.forEach(u => {
@@ -722,6 +800,64 @@
                         <td class="p-2">${actionBtn}</td>
                     </tr>
                 `;
+            });
+
+            // TAB 2: MATCHING PAIRS FOR ADMIN NOTIFICATIONS
+            const matchesTbody = document.getElementById('adminMatchesTable');
+            matchesTbody.innerHTML = '';
+            let pairCount = 0;
+
+            for(let i=0; i<users.length; i++) {
+                for(let j=i+1; j<users.length; j++) {
+                    let u1 = users[i];
+                    let u2 = users[j];
+
+                    if(u1.kada === u2.kada) {
+                        let isMatch = (u1.current_region.toLowerCase() === u2.target_region.toLowerCase()) || 
+                                      (u2.current_region.toLowerCase() === u1.target_region.toLowerCase());
+
+                        if(isMatch) {
+                            pairCount++;
+                            let subs1 = u1.sub1 ? `${u1.sub1} / ${u1.sub2}` : 'N/A';
+                            
+                            let msgText = `Habari ${u1.name}, kutokea Utumishi Swap. Tumpata mtumishi wa kada yako (${u2.name} wa ${u2.current_region}) anayetaka kwenda ${u2.target_region}. Ingia kwenye mfumo uweze kuwasiliana naye.`;
+                            let waLink1 = `https://wa.me/255${u1.phone.replace(/^0+/, '')}?text=${encodeURIComponent(msgText)}`;
+                            let waLink2 = `https://wa.me/255${u2.phone.replace(/^0+/, '')}?text=${encodeURIComponent(msgText)}`;
+
+                            matchesTbody.innerHTML += `
+                                <tr class="border-b hover:bg-slate-50">
+                                    <td class="p-2 font-bold text-emerald-900">${u1.name}<br><span class="text-[10px] text-slate-500">${u1.phone}</span></td>
+                                    <td class="p-2">${u1.kada}<br><span class="text-[10px] text-slate-500">${subs1}</span></td>
+                                    <td class="p-2">${u1.current_region} ➔ ${u1.target_region}</td>
+                                    <td class="p-2 font-bold text-teal-900">${u2.name}<br><span class="text-[10px] text-slate-500">${u2.phone}</span></td>
+                                    <td class="p-2">${u2.current_region} ➔ ${u2.target_region}</td>
+                                    <td class="p-2 space-y-1">
+                                        <a href="${waLink1}" target="_blank" class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2 py-1 rounded"><i class="fa-brands fa-whatsapp"></i> Tuma U1</a>
+                                        <a href="${waLink2}" target="_blank" class="inline-block bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold px-2 py-1 rounded"><i class="fa-brands fa-whatsapp"></i> Tuma U2</a>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    }
+                }
+            }
+            document.getElementById('adminMatchCount').innerText = pairCount;
+
+            // TAB 3: SEARCHED / CONTACTS INTERACTED
+            const searchesTbody = document.getElementById('adminSearchesTable');
+            searchesTbody.innerHTML = '';
+            users.forEach(u => {
+                if(u.paid) {
+                    searchesTbody.innerHTML += `
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="p-2 font-bold">${u.name}</td>
+                            <td class="p-2">${u.phone}</td>
+                            <td class="p-2 text-slate-500">Mtumishi Alyematch</td>
+                            <td class="p-2 text-slate-500">Namba Ilionekana</td>
+                            <td class="p-2"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">VIP Active (TZS 2,000)</span></td>
+                        </tr>
+                    `;
+                }
             });
         }
 
