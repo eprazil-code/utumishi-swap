@@ -599,6 +599,7 @@
         function loadDistricts(regSelectId, distSelectId) {
             const regVal = document.getElementById(regSelectId).value;
             const distEl = document.getElementById(distSelectId);
+            if(!distEl) return;
             distEl.innerHTML = '<option value="">-- Chagua Wilaya --</option>';
             if(regVal && tanzaniaRegions[regVal]) {
                 tanzaniaRegions[regVal].forEach(dist => {
@@ -622,12 +623,14 @@
         function toggleSubjectsProfile() {
             const kada = document.getElementById('profKada').value;
             const subSec = document.getElementById('profSubjectSec');
-            if(kada.includes('Ualimu')) {
-                subSec.classList.remove('hidden');
-                subSec.classList.add('grid');
-            } else {
-                subSec.classList.remove('grid');
-                subSec.classList.add('hidden');
+            if(subSec) {
+                if(kada.includes('Ualimu')) {
+                    subSec.classList.remove('hidden');
+                    subSec.classList.add('grid');
+                } else {
+                    subSec.classList.remove('grid');
+                    subSec.classList.add('hidden');
+                }
             }
         }
 
@@ -635,3 +638,571 @@
             ['authView', 'dashboardView', 'profileView', 'commentsView', 'adminView'].forEach(v => {
                 const el = document.getElementById(v);
                 if(el) el.classList.add('hidden');
+            });
+            
+            const targetEl = document.getElementById(viewId);
+            if(targetEl) targetEl.classList.remove('hidden');
+
+            const currentUser = getCurrentUser();
+            if(currentUser) {
+                document.getElementById('appNavLinks').classList.remove('hidden');
+                if(viewId === 'dashboardView') loadDashboard();
+                if(viewId === 'profileView') loadProfileForm();
+                if(viewId === 'commentsView') fetchComments();
+            } else {
+                document.getElementById('appNavLinks').classList.add('hidden');
+            }
+
+            if(viewId === 'adminView') {
+                document.getElementById('adminLoginForm').classList.remove('hidden');
+                document.getElementById('adminDashboard').classList.add('hidden');
+            }
+        }
+
+        // Signup User to Supabase Cloud Database
+        async function handleSignup(e) {
+            e.preventDefault();
+            const email = document.getElementById('signEmail').value.trim();
+            const pass = document.getElementById('signPass').value;
+            const name = document.getElementById('signName').value.trim();
+            const phone = document.getElementById('signPhone').value.trim();
+            const kada = document.getElementById('signKada').value;
+            const years = parseInt(document.getElementById('signYears').value) || 0;
+            const sub1 = document.getElementById('signSub1').value.trim();
+            const sub2 = document.getElementById('signSub2').value.trim();
+            const current_region = document.getElementById('signCurrentRegion').value;
+            const current_district = document.getElementById('signCurrentDistrict').value;
+            const target_region = document.getElementById('signTargetRegion').value;
+            const target_district = document.getElementById('signTargetDistrict').value;
+
+            const { data, error } = await _supabase.from('users').insert([
+                { email, pass, name, phone, kada, years, sub1, sub2, current_region, current_district, target_region, target_district, paid: false, payment_status: 'none' }
+            ]);
+
+            if (error) {
+                alert("Makosa katika usajili: " + error.message);
+            } else {
+                alert('Usajili wako umekamilika kikamilifu! Sasa unaweza kuingia (Login) kuona watumishi walio tayari kubadilishana vituo na wewe.');
+                document.getElementById('signupForm').reset();
+            }
+        }
+
+        // Login User from Supabase
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value;
+
+            const { data, error } = await _supabase.from('users').select('*').eq('email', email).eq('pass', pass).single();
+
+            if (data) {
+                setCurrentUser(data);
+                navigate('dashboardView');
+            } else {
+                alert('Email au Nenosiri sio sahihi. Tafadhali jaribu tena.');
+            }
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('utumishi_current_user');
+            document.getElementById('appNavLinks').classList.add('hidden');
+            navigate('authView');
+        }
+
+        // LOAD CURRENT USER DATA DIRECTLY INTO PROFILE FORM
+        async function loadProfileForm() {
+            let user = getCurrentUser();
+            if(!user) return;
+
+            // Fetch absolute latest data from Supabase
+            const { data: latest } = await _supabase.from('users').select('*').eq('email', user.email).single();
+            if(latest) {
+                user = latest;
+                setCurrentUser(user);
+            }
+
+            document.getElementById('profEmail').value = user.email || '';
+            document.getElementById('profName').value = user.name || '';
+            document.getElementById('profPhone').value = user.phone || '';
+            document.getElementById('profYears').value = user.years || 0;
+            document.getElementById('profKada').value = user.kada || '';
+            document.getElementById('profSub1').value = user.sub1 || '';
+            document.getElementById('profSub2').value = user.sub2 || '';
+
+            toggleSubjectsProfile();
+
+            // Populate region dropdowns & select user's saved choices
+            populateRegions();
+
+            if(user.current_region) {
+                document.getElementById('profCurrentReg').value = user.current_region;
+                loadDistricts('profCurrentReg', 'profCurrentDist');
+                if(user.current_district) document.getElementById('profCurrentDist').value = user.current_district;
+            }
+
+            if(user.target_region) {
+                document.getElementById('profTargetReg').value = user.target_region;
+                loadDistricts('profTargetReg', 'profTargetDist');
+                if(user.target_district) document.getElementById('profTargetDist').value = user.target_district;
+            }
+        }
+
+        // SAVE UPDATED PROFILE DATA BACK TO SUPABASE
+        async function handleUpdateProfile(e) {
+            e.preventDefault();
+            let user = getCurrentUser();
+            if(!user) return;
+
+            const name = document.getElementById('profName').value.trim();
+            const phone = document.getElementById('profPhone').value.trim();
+            const years = parseInt(document.getElementById('profYears').value) || 0;
+            const kada = document.getElementById('profKada').value;
+            const sub1 = document.getElementById('profSub1').value.trim();
+            const sub2 = document.getElementById('profSub2').value.trim();
+            const current_region = document.getElementById('profCurrentReg').value;
+            const current_district = document.getElementById('profCurrentDist').value;
+            const target_region = document.getElementById('profTargetReg').value;
+            const target_district = document.getElementById('profTargetDist').value;
+
+            const { data, error } = await _supabase.from('users').update({
+                name, phone, years, kada, sub1, sub2, current_region, current_district, target_region, target_district
+            }).eq('email', user.email);
+
+            if(error) {
+                alert("Makosa katika kusasisha profile: " + error.message);
+            } else {
+                user.name = name;
+                user.phone = phone;
+                user.years = years;
+                user.kada = kada;
+                user.sub1 = sub1;
+                user.sub2 = sub2;
+                user.current_region = current_region;
+                user.current_district = current_district;
+                user.target_region = target_region;
+                user.target_district = target_district;
+                setCurrentUser(user);
+
+                alert("Taarifa zako za Profile zimesasishwa kikamilifu kwenye mfumo!");
+                loadDashboard();
+            }
+        }
+
+        // Load Dashboard & Flexible Broad Match Logic from Supabase
+        async function loadDashboard() {
+            let user = getCurrentUser();
+            if(!user) return;
+
+            // Refresh latest user status directly from Supabase DB
+            const { data: latestUser } = await _supabase.from('users').select('*').eq('email', user.email).single();
+            if(latestUser) {
+                user = latestUser;
+                setCurrentUser(user);
+            }
+
+            document.getElementById('dashWelcomeName').innerText = `Karibu, ${user.name}!`;
+            document.getElementById('dashUserSummary').innerText = `Kada: ${user.kada} | Uliopo: ${user.current_region} (${user.current_district}) ➔ Unataka: ${user.target_region} (${user.target_district})`;
+            
+            const badge = document.getElementById('dashPaidBadge');
+            if(user.paid === true) {
+                badge.className = "bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
+                badge.innerText = "Account Status: VIP ACTIVE";
+            } else if(user.payment_status === 'pending') {
+                badge.className = "bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
+                badge.innerText = "Account Status: MUAMALA UNAPITIWA NA ADMIN (PENDING)";
+            } else {
+                badge.className = "bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
+                badge.innerText = "Account Status: FREE";
+            }
+
+            // Fetch All Users from Supabase
+            const { data: users, error } = await _supabase.from('users').select('*');
+            if (error || !users) return;
+
+            // FLEXIBLE MATCHING LOGIC
+            let matches = users.filter(other => {
+                if(other.email.toLowerCase() === user.email.toLowerCase()) return false;
+                if(other.kada !== user.kada) return false;
+
+                // Broad Region Matching
+                let regionMatch = (other.current_region.toLowerCase() === user.target_region.toLowerCase()) || 
+                                  (other.target_region.toLowerCase() === user.current_region.toLowerCase());
+
+                if(!regionMatch) return false;
+
+                // Teachers Subject Match
+                if(user.kada.includes('Ualimu')) {
+                    let uSubs = [user.sub1, user.sub2].map(s => (s || '').trim().toLowerCase()).filter(s => s.length > 0);
+                    let oSubs = [other.sub1, other.sub2].map(s => (s || '').trim().toLowerCase()).filter(s => s.length > 0);
+                    
+                    if(uSubs.length > 0 && oSubs.length > 0) {
+                        let hasCommonSub = uSubs.some(s => oSubs.some(os => os.includes(s) || s.includes(os)));
+                        if(!hasCommonSub) return false;
+                    }
+                }
+
+                return true;
+            });
+
+            document.getElementById('dashMatchCount').innerText = matches.length;
+            const grid = document.getElementById('dashMatchesGrid');
+            grid.innerHTML = '';
+
+            if(matches.length === 0) {
+                grid.innerHTML = `<div class="col-span-full bg-white p-6 rounded-xl text-center text-slate-500 text-sm border">Hakuna mtumishi aliyepatikana kwa sasa anayefanana na vigezo au masomo yako. Tafadhali subiri wengine wajisajili au sasisha mkoa unaotaka.</div>`;
+                return;
+            }
+
+            matches.forEach(m => {
+                let contactDisplay = (user.paid === true) ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-phone mr-1"></i> ${m.phone}</span>` : `<span class="text-slate-400 italic"><i class="fa-solid fa-lock mr-1"></i> Namba imefungwa</span>`;
+                
+                let actionBtn = "";
+                if(user.paid === true) {
+                    actionBtn = `<a href="https://wa.me/255${m.phone.replace(/^0+/, '')}" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition"><i class="fa-brands fa-whatsapp mr-1"></i> Chat WhatsApp</a>`;
+                } else if(user.payment_status === 'pending') {
+                    actionBtn = `<div class="bg-blue-50 text-blue-800 text-[11px] p-2.5 rounded-lg font-bold text-center border border-blue-200"><i class="fa-solid fa-clock fa-spin mr-1"></i> Transaction ID yako inahakikiwa na Admin. Subiri kidogo...</div>`;
+                } else {
+                    actionBtn = `<button onclick="triggerPaymentForUser('${m.name}', '${m.email}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-lg transition shadow"><i class="fa-solid fa-lock mr-1"></i> Bonyeza Uone Namba & WhatsApp</button>`;
+                }
+
+                grid.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full">${m.kada}</span>
+                            <span class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i> ${m.years} Miaka Kazini</span>
+                        </div>
+                        <div class="space-y-1 text-xs text-slate-600">
+                            <p><strong class="text-slate-800">Jina:</strong> ${m.name}</p>
+                            <p><strong class="text-slate-800">Yupo Sasa:</strong> ${m.current_region} (${m.current_district})</p>
+                            <p><strong class="text-slate-800">Anataka Kwenda:</strong> ${m.target_region} (${m.target_district})</p>
+                            ${m.sub1 ? `<p><strong class="text-slate-800">Masomo:</strong> ${m.sub1}${m.sub2 ? ', '+m.sub2 : ''}</p>` : ''}
+                            <p class="pt-2">${contactDisplay}</p>
+                        </div>
+                        <div class="pt-2">
+                            ${actionBtn}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // ================= COMMENTS SYSTEM =================
+        async function postComment(e) {
+            e.preventDefault();
+            const user = getCurrentUser();
+            if(!user) {
+                alert("Tafadhali ingia kwenye akaunti kwanza ili kutoa maoni.");
+                return;
+            }
+
+            const comment_text = document.getElementById('cmtText').value.trim();
+            if(!comment_text) return;
+
+            const { data, error } = await _supabase.from('comments').insert([
+                { user_name: user.name, user_email: user.email, region: user.current_region, comment_text }
+            ]);
+
+            if(error) {
+                alert("Makosa katika kutuma maoni: " + error.message);
+            } else {
+                document.getElementById('cmtText').value = '';
+                alert("Maoni yako yametumwa kikamilifu!");
+                fetchComments();
+            }
+        }
+
+        async function fetchComments() {
+            const feed = document.getElementById('commentsFeed');
+            if(!feed) return;
+            feed.innerHTML = '<p class="text-xs text-slate-400">Inapakua maoni...</p>';
+
+            const { data: comments, error } = await _supabase.from('comments').select('*').order('id', { ascending: false });
+
+            if(error || !comments) {
+                feed.innerHTML = '<p class="text-xs text-slate-500">Bado hakuna maoni kwa sasa.</p>';
+                return;
+            }
+
+            if(comments.length === 0) {
+                feed.innerHTML = '<p class="text-xs text-slate-500">Kuwa wa kwanza kutoa maoni hapa!</p>';
+                return;
+            }
+
+            feed.innerHTML = '';
+            comments.forEach(c => {
+                feed.innerHTML += `
+                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-xs text-slate-900"><i class="fa-solid fa-circle-user text-emerald-600 mr-1"></i> ${c.user_name} (${c.region || 'Mtanzania'})</span>
+                            <span class="text-[10px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i> Live</span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed">${c.comment_text}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function triggerPaymentForUser(targetName, targetEmail) {
+            selectedTargetContactUser = { name: targetName, email: targetEmail };
+            openPaymentModal();
+        }
+
+        // Admin Auth Logic
+        function loginAdmin() {
+            const u = document.getElementById('adminUser').value.trim();
+            const p = document.getElementById('adminPass').value.trim();
+
+            if(u === 'eprazil@gmail.com' && p === '1995') {
+                document.getElementById('adminLoginForm').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                loadAdminData();
+            } else {
+                alert('Username au Password ya Admin si sahihi!');
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('adminLoginForm').classList.remove('hidden');
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+        }
+
+        function switchAdminTab(tabName) {
+            ['Users', 'Matches', 'Searches', 'Comments'].forEach(t => {
+                const el = document.getElementById('adminTab' + t);
+                const btn = document.getElementById('tabBtn' + t);
+                if(el) el.classList.add('hidden');
+                if(btn) btn.className = "px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg whitespace-nowrap";
+            });
+
+            if(tabName === 'users') {
+                document.getElementById('adminTabUsers').classList.remove('hidden');
+                document.getElementById('tabBtnUsers').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg whitespace-nowrap";
+            } else if(tabName === 'matches') {
+                document.getElementById('adminTabMatches').classList.remove('hidden');
+                document.getElementById('tabBtnMatches').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg whitespace-nowrap";
+            } else if(tabName === 'searches') {
+                document.getElementById('adminTabSearches').classList.remove('hidden');
+                document.getElementById('tabBtnSearches').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg whitespace-nowrap";
+            } else if(tabName === 'comments') {
+                document.getElementById('adminTabComments').classList.remove('hidden');
+                document.getElementById('tabBtnComments').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg whitespace-nowrap";
+                loadAdminComments();
+            }
+        }
+
+        // Fetch Real Users Live into Admin Panel
+        async function loadAdminData() {
+            const { data: users, error } = await _supabase.from('users').select('*');
+            if(error) {
+                alert("Makosa katika kupakua orodha ya watumishi: " + error.message);
+                return;
+            }
+            if(!users) return;
+
+            let paidCount = users.filter(u => u.paid === true).length;
+            
+            document.getElementById('statTotalUsers').innerText = users.length;
+            document.getElementById('statPaidUsers').innerText = paidCount;
+            document.getElementById('statEarnings').innerText = `TZS ${(paidCount * 2000).toLocaleString()}`;
+
+            // TAB 1: USERS TABLE WITH DIRECT REALTIME REVOKE/APPROVE
+            const tbody = document.getElementById('adminUserTable');
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                let statusBadge = "";
+                let actionBtn = "";
+
+                if(u.paid === true) {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">VIP Active</span>`;
+                    actionBtn = `<button onclick="forceSetVIPStatus('${u.email}', false)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-[10px] font-bold shadow transition"><i class="fa-solid fa-user-xmark mr-1"></i> Kumtoa VIP (Revoke)</button>`;
+                } else if(u.payment_status === 'pending') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Pending Review</span>`;
+                    actionBtn = `
+                        <button onclick="forceSetVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow mr-1"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>
+                        <button onclick="forceSetVIPStatus('${u.email}', false)" class="bg-red-600 text-white hover:bg-red-700 px-2 py-1 rounded text-[10px] font-bold"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                    `;
+                } else {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Free</span>`;
+                    actionBtn = `<button onclick="forceSetVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-user-check mr-1"></i> Kumuweka VIP</button>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2 font-bold">${u.name}</td>
+                        <td class="p-2">${u.email}</td>
+                        <td class="p-2">${u.phone}</td>
+                        <td class="p-2">${u.kada}</td>
+                        <td class="p-2">${u.current_region}</td>
+                        <td class="p-2">${u.target_region}</td>
+                        <td class="p-2 font-mono text-xs font-bold text-slate-700">${u.tx_code || '-'}</td>
+                        <td class="p-2">${statusBadge}</td>
+                        <td class="p-2">${actionBtn}</td>
+                    </tr>
+                `;
+            });
+
+            // TAB 2: MATCHING PAIRS FOR ADMIN NOTIFICATIONS
+            const matchesTbody = document.getElementById('adminMatchesTable');
+            matchesTbody.innerHTML = '';
+            let pairCount = 0;
+
+            for(let i=0; i<users.length; i++) {
+                for(let j=i+1; j<users.length; j++) {
+                    let u1 = users[i];
+                    let u2 = users[j];
+
+                    if(u1.kada === u2.kada) {
+                        let isMatch = (u1.current_region.toLowerCase() === u2.target_region.toLowerCase()) || 
+                                      (u2.current_region.toLowerCase() === u1.target_region.toLowerCase());
+
+                        if(isMatch) {
+                            pairCount++;
+                            let subs1 = u1.sub1 ? `${u1.sub1} / ${u1.sub2}` : 'N/A';
+                            
+                            let msgText = `Habari ${u1.name}, kutokea Utumishi Swap. Tumpata mtumishi wa kada yako (${u2.name} wa ${u2.current_region}) anayetaka kwenda ${u2.target_region}. Ingia kwenye mfumo uweze kuwasiliana naye.`;
+                            let waLink1 = `https://wa.me/255${u1.phone.replace(/^0+/, '')}?text=${encodeURIComponent(msgText)}`;
+                            let waLink2 = `https://wa.me/255${u2.phone.replace(/^0+/, '')}?text=${encodeURIComponent(msgText)}`;
+
+                            matchesTbody.innerHTML += `
+                                <tr class="border-b hover:bg-slate-50">
+                                    <td class="p-2 font-bold text-emerald-900">${u1.name}<br><span class="text-[10px] text-slate-500">${u1.phone}</span></td>
+                                    <td class="p-2">${u1.kada}<br><span class="text-[10px] text-slate-500">${subs1}</span></td>
+                                    <td class="p-2">${u1.current_region} ➔ ${u1.target_region}</td>
+                                    <td class="p-2 font-bold text-teal-900">${u2.name}<br><span class="text-[10px] text-slate-500">${u2.phone}</span></td>
+                                    <td class="p-2">${u2.current_region} ➔ ${u2.target_region}</td>
+                                    <td class="p-2 space-y-1">
+                                        <a href="${waLink1}" target="_blank" class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2 py-1 rounded"><i class="fa-brands fa-whatsapp"></i> Tuma U1</a>
+                                        <a href="${waLink2}" target="_blank" class="inline-block bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold px-2 py-1 rounded"><i class="fa-brands fa-whatsapp"></i> Tuma U2</a>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    }
+                }
+            }
+            document.getElementById('adminMatchCount').innerText = pairCount;
+
+            // TAB 3: SEARCHED / CONTACTS INTERACTED
+            const searchesTbody = document.getElementById('adminSearchesTable');
+            searchesTbody.innerHTML = '';
+            users.forEach(u => {
+                if(u.paid === true || u.payment_status === 'pending') {
+                    searchesTbody.innerHTML += `
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="p-2 font-bold">${u.name}</td>
+                            <td class="p-2">${u.phone}</td>
+                            <td class="p-2 text-slate-500">Mtumishi Aliyematch</td>
+                            <td class="p-2 font-mono">${u.tx_code || '-'}</td>
+                            <td class="p-2">${u.paid === true ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">VIP Active</span>' : '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Pending Approval</span>'}</td>
+                        </tr>
+                    `;
+                }
+            });
+        }
+
+        // LOAD ADMIN COMMENTS TAB WITH DELETE BUTTON
+        async function loadAdminComments() {
+            const list = document.getElementById('adminCommentsList');
+            if(!list) return;
+            list.innerHTML = '<p class="text-xs text-slate-400">Inapakua maoni...</p>';
+
+            const { data: comments, error } = await _supabase.from('comments').select('*').order('id', { ascending: false });
+
+            if(error || !comments || comments.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-500">Hakuna maoni yoyote kwenye mfumo kwa sasa.</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            comments.forEach(c => {
+                list.innerHTML += `
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-start gap-4">
+                        <div class="space-y-1 text-xs">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-slate-900">${c.user_name}</span>
+                                <span class="text-slate-400">(${c.user_email})</span>
+                            </div>
+                            <p class="text-slate-700">${c.comment_text}</p>
+                        </div>
+                        <button onclick="deleteComment(${c.id})" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2.5 py-1 rounded shadow transition whitespace-nowrap">
+                            <i class="fa-solid fa-trash mr-1"></i> Futa Comment
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        async function deleteComment(commentId) {
+            if(!confirm("Je, una uhakika unataka kufuta maoni haya kabisa?")) return;
+
+            const { error } = await _supabase.from('comments').delete().eq('id', commentId);
+
+            if(error) {
+                alert("Makosa katika kufuta comment: " + error.message);
+            } else {
+                alert("Maoni yamefutwa kikamilifu!");
+                loadAdminComments();
+            }
+        }
+
+        // DIRECT SIMPLE UPDATE FUNCTION FOR VIP STATUS
+        async function forceSetVIPStatus(targetEmail, status) {
+            const { data, error } = await _supabase
+                .from('users')
+                .update({ paid: status, payment_status: status ? 'approved' : 'none' })
+                .eq('email', targetEmail);
+
+            if (error) {
+                alert("Makosa kutoka Supabase: " + error.message);
+            } else {
+                let currentUser = getCurrentUser();
+                if(currentUser && currentUser.email.toLowerCase() === targetEmail.toLowerCase()) {
+                    currentUser.paid = status;
+                    currentUser.payment_status = status ? 'approved' : 'none';
+                    setCurrentUser(currentUser);
+                }
+
+                alert(`Mabadiliko yamefanikiwa!\nEmail: ${targetEmail}\nHali Mpya: ${status ? 'VIP ACTIVE' : 'FREE / REVOKED'}`);
+                loadAdminData();
+            }
+        }
+
+        function openPaymentModal() {
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+
+        // SUBMIT PAYMENT FOR ADMIN APPROVAL
+        async function submitPayment() {
+            const tx = document.getElementById('payTxCode').value.trim();
+            if(!tx) {
+                alert('Tafadhali weka namba ya muamala (Transaction ID).');
+                return;
+            }
+
+            let user = getCurrentUser();
+            if(user) {
+                user.paid = false;
+                user.payment_status = 'pending';
+                user.tx_code = tx;
+                setCurrentUser(user);
+
+                await _supabase.from('users').update({ paid: false, payment_status: 'pending', tx_code: tx }).eq('email', user.email);
+            }
+
+            closeModal();
+            alert('Namba yako ya muamala imepokelewa kikamilifu! Tafadhali subiri uhakiki wa Admin (Wait for Approval). Utakapoidhinishwa, utaona namba za simu papo hapo.');
+            loadDashboard();
+        }
+
+        window.onload = function() {
+            populateRegions();
+        };
+    </script>
+</body>
+</html>
