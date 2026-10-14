@@ -354,9 +354,9 @@
                     <button onclick="switchAdminTab('searches')" id="tabBtnSearches" class="px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg">Watu Waliotafutana</button>
                 </div>
 
-                <!-- TAB 1: ALL USERS -->
+                <!-- TAB 1: ALL USERS WITH APPROVAL WORKFLOW -->
                 <div id="adminTabUsers" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
-                    <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha Kamili ya Watumishi na Usimamizi wa Malipo</h3>
+                    <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha Kamili ya Watumishi na Uhakiki wa Malipo</h3>
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-100 text-slate-600 border-b">
                             <tr>
@@ -366,8 +366,9 @@
                                 <th class="p-2">Kada</th>
                                 <th class="p-2">Mkoa Sasa</th>
                                 <th class="p-2">Mkoa Target</th>
-                                <th class="p-2">Hali ya VIP</th>
-                                <th class="p-2">Action</th>
+                                <th class="p-2">Tx ID (Kutoka kwa Mteja)</th>
+                                <th class="p-2">Hali ya Malipo</th>
+                                <th class="p-2">Action (Thibitisha)</th>
                             </tr>
                         </thead>
                         <tbody id="adminUserTable">
@@ -448,7 +449,7 @@
             </div>
 
             <button onclick="submitPayment()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-sm shadow transition">
-                Thibitisha Malipo Sasa
+                Tuma Namba ya Muamala
             </button>
         </div>
     </div>
@@ -600,7 +601,7 @@
             const target_district = document.getElementById('signTargetDistrict').value;
 
             const { data, error } = await _supabase.from('users').insert([
-                { email, pass, name, phone, kada, years, sub1, sub2, current_region, current_district, target_region, target_district, paid: false }
+                { email, pass, name, phone, kada, years, sub1, sub2, current_region, current_district, target_region, target_district, paid: false, payment_status: 'none' }
             ]);
 
             if (error) {
@@ -652,6 +653,9 @@
             if(user.paid) {
                 badge.className = "bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
                 badge.innerText = "Account Status: VIP ACTIVE";
+            } else if(user.payment_status === 'pending') {
+                badge.className = "bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
+                badge.innerText = "Account Status: MUAMALA UNAPITIWA NA ADMIN (PENDING)";
             } else {
                 badge.className = "bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
                 badge.innerText = "Account Status: FREE";
@@ -698,9 +702,14 @@
             matches.forEach(m => {
                 let contactDisplay = user.paid ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-phone mr-1"></i> ${m.phone}</span>` : `<span class="text-slate-400 italic"><i class="fa-solid fa-lock mr-1"></i> Namba imefungwa</span>`;
                 
-                let actionBtn = user.paid ? 
-                    `<a href="https://wa.me/255${m.phone.replace(/^0+/, '')}" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition"><i class="fa-brands fa-whatsapp mr-1"></i> Chat WhatsApp</a>` :
-                    `<button onclick="triggerPaymentForUser('${m.name}', '${m.email}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-lg transition shadow"><i class="fa-solid fa-lock mr-1"></i> Bonyeza Uone Namba & WhatsApp</button>`;
+                let actionBtn = "";
+                if(user.paid) {
+                    actionBtn = `<a href="https://wa.me/255${m.phone.replace(/^0+/, '')}" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition"><i class="fa-brands fa-whatsapp mr-1"></i> Chat WhatsApp</a>`;
+                } else if(user.payment_status === 'pending') {
+                    actionBtn = `<div class="bg-blue-50 text-blue-800 text-[11px] p-2.5 rounded-lg font-bold text-center border border-blue-200"><i class="fa-solid fa-clock fa-spin mr-1"></i> Transaction ID yako inahakikiwa na Admin. Subiri kidoogo (Wait for approval)...</div>`;
+                } else {
+                    actionBtn = `<button onclick="triggerPaymentForUser('${m.name}', '${m.email}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-lg transition shadow"><i class="fa-solid fa-lock mr-1"></i> Bonyeza Uone Namba & WhatsApp</button>`;
+                }
 
                 grid.innerHTML += `
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
@@ -782,11 +791,22 @@
             const tbody = document.getElementById('adminUserTable');
             tbody.innerHTML = '';
             users.forEach(u => {
-                let statusBadge = u.paid ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">VIP (Paid)</span>` : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Free</span>`;
-                
-                let actionBtn = u.paid ? 
-                    `<button onclick="toggleUserPaidStatus('${u.email}', false)" class="bg-red-100 text-red-700 hover:bg-red-200 px-2 py-1 rounded text-[10px] font-bold">Revoke VIP</button>` :
-                    `<button onclick="toggleUserPaidStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>`;
+                let statusBadge = "";
+                let actionBtn = "";
+
+                if(u.paid) {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">VIP (Approved)</span>`;
+                    actionBtn = `<button onclick="toggleUserPaidStatus('${u.email}', false, 'none')" class="bg-red-100 text-red-700 hover:bg-red-200 px-2 py-1 rounded text-[10px] font-bold">Revoke VIP</button>`;
+                } else if(u.payment_status === 'pending') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Pending Review</span>`;
+                    actionBtn = `
+                        <button onclick="toggleUserPaidStatus('${u.email}', true, 'approved')" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow mr-1"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>
+                        <button onclick="toggleUserPaidStatus('${u.email}', false, 'rejected')" class="bg-red-600 text-white hover:bg-red-700 px-2 py-1 rounded text-[10px] font-bold"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                    `;
+                } else {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Free</span>`;
+                    actionBtn = `<button onclick="toggleUserPaidStatus('${u.email}', true, 'approved')" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>`;
+                }
 
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
@@ -796,6 +816,7 @@
                         <td class="p-2">${u.kada}</td>
                         <td class="p-2">${u.current_region}</td>
                         <td class="p-2">${u.target_region}</td>
+                        <td class="p-2 font-mono text-xs font-bold text-slate-700">${u.tx_code || '-'}</td>
                         <td class="p-2">${statusBadge}</td>
                         <td class="p-2">${actionBtn}</td>
                     </tr>
@@ -847,27 +868,27 @@
             const searchesTbody = document.getElementById('adminSearchesTable');
             searchesTbody.innerHTML = '';
             users.forEach(u => {
-                if(u.paid) {
+                if(u.paid || u.payment_status === 'pending') {
                     searchesTbody.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
                             <td class="p-2 font-bold">${u.name}</td>
                             <td class="p-2">${u.phone}</td>
-                            <td class="p-2 text-slate-500">Mtumishi Alyematch</td>
-                            <td class="p-2 text-slate-500">Namba Ilionekana</td>
-                            <td class="p-2"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">VIP Active (TZS 2,000)</span></td>
+                            <td class="p-2 text-slate-500">Mtumishi Aliyematch</td>
+                            <td class="p-2 text-slate-500">Tx Code: ${u.tx_code || '-'}</td>
+                            <td class="p-2">${u.paid ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">VIP Active</span>' : '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Pending Approval</span>'}</td>
                         </tr>
                     `;
                 }
             });
         }
 
-        // Toggle Status Manual Direct in Database
-        async function toggleUserPaidStatus(email, status) {
-            const { error } = await _supabase.from('users').update({ paid: status }).eq('email', email);
+        // Toggle Status Manual Direct in Database & Approval Logic
+        async function toggleUserPaidStatus(email, status, payment_status) {
+            const { error } = await _supabase.from('users').update({ paid: status, payment_status: payment_status }).eq('email', email);
             if (error) {
                 alert("Makosa katika kusasisha: " + error.message);
             } else {
-                alert(`Hali ya VIP kwa ${email} imesasishwa kikamilifu kuwa: ${status ? 'ACTIVE (Paid)' : 'FREE'}`);
+                alert(`Hali ya malipo kwa ${email} imesasishwa kikamilifu! Status: ${status ? 'APPROVED (VIP ACTIVE)' : 'FREE / REJECTED'}`);
                 loadAdminData();
             }
         }
@@ -880,6 +901,7 @@
             document.getElementById('paymentModal').classList.add('hidden');
         }
 
+        // SUBMIT PAYMENT FOR ADMIN APPROVAL
         async function submitPayment() {
             const tx = document.getElementById('payTxCode').value.trim();
             if(!tx) {
@@ -889,14 +911,16 @@
 
             let user = getCurrentUser();
             if(user) {
-                user.paid = true;
+                user.paid = false;
+                user.payment_status = 'pending';
+                user.tx_code = tx;
                 setCurrentUser(user);
 
-                await _supabase.from('users').update({ paid: true }).eq('email', user.email);
+                await _supabase.from('users').update({ paid: false, payment_status: 'pending', tx_code: tx }).eq('email', user.email);
             }
 
             closeModal();
-            alert('Thibitisho la muamala wako limepokelewa! Sasa unaweza kuona namba za simu na kuchat WhatsApp.');
+            alert('Namba yako ya muamala imepokelewa kikamilifu! Tafadhali subiri uhakiki wa Admin (Wait for Approval). Utakapoidhinishwa, utaona namba za simu papo hapo.');
             loadDashboard();
         }
 
