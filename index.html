@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- SEO Meta Tags & Search Console Tag -->
     <title>Utumishi Swap - Mfumo wa Kubadilishana Vituo vya Kazi Utumishi wa Umma</title>
     <meta name="google-site-verification" content="Np-VA5zJvnrY7bsmivrMAaDOOhXHZhu-Vnjj46f_zqQ" />
     <meta name="description" content="Utumishi Swap ni mfumo rasmi wa kulinganisha na kubadilishana vituo vya kazi kwa watumishi wa umma Tanzania.">
@@ -639,7 +638,7 @@
             let user = getCurrentUser();
             if(!user) return;
 
-            // Refresh latest user status from Supabase
+            // Refresh latest user status directly from Supabase DB to eliminate cache issues
             const { data: latestUser } = await _supabase.from('users').select('*').eq('email', user.email).single();
             if(latestUser) {
                 user = latestUser;
@@ -650,7 +649,7 @@
             document.getElementById('dashUserSummary').innerText = `Kada: ${user.kada} | Uliopo: ${user.current_region} (${user.current_district}) ➔ Unataka: ${user.target_region} (${user.target_district})`;
             
             const badge = document.getElementById('dashPaidBadge');
-            if(user.paid) {
+            if(user.paid === true) {
                 badge.className = "bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
                 badge.innerText = "Account Status: VIP ACTIVE";
             } else if(user.payment_status === 'pending') {
@@ -700,10 +699,10 @@
             }
 
             matches.forEach(m => {
-                let contactDisplay = user.paid ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-phone mr-1"></i> ${m.phone}</span>` : `<span class="text-slate-400 italic"><i class="fa-solid fa-lock mr-1"></i> Namba imefungwa</span>`;
+                let contactDisplay = (user.paid === true) ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-phone mr-1"></i> ${m.phone}</span>` : `<span class="text-slate-400 italic"><i class="fa-solid fa-lock mr-1"></i> Namba imefungwa</span>`;
                 
                 let actionBtn = "";
-                if(user.paid) {
+                if(user.paid === true) {
                     actionBtn = `<a href="https://wa.me/255${m.phone.replace(/^0+/, '')}" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition"><i class="fa-brands fa-whatsapp mr-1"></i> Chat WhatsApp</a>`;
                 } else if(user.payment_status === 'pending') {
                     actionBtn = `<div class="bg-blue-50 text-blue-800 text-[11px] p-2.5 rounded-lg font-bold text-center border border-blue-200"><i class="fa-solid fa-clock fa-spin mr-1"></i> Transaction ID yako inahakikiwa na Admin. Subiri kidogo...</div>`;
@@ -779,33 +778,37 @@
         // Fetch Real Users Live into Admin Panel
         async function loadAdminData() {
             const { data: users, error } = await _supabase.from('users').select('*');
-            if(error || !users) return;
+            if(error) {
+                alert("Makosa katika kupakua orodha ya watumishi: " + error.message);
+                return;
+            }
+            if(!users) return;
 
-            let paidCount = users.filter(u => u.paid).length;
+            let paidCount = users.filter(u => u.paid === true).length;
             
             document.getElementById('statTotalUsers').innerText = users.length;
             document.getElementById('statPaidUsers').innerText = paidCount;
             document.getElementById('statEarnings').innerText = `TZS ${(paidCount * 2000).toLocaleString()}`;
 
-            // TAB 1: USERS TABLE WITH DIRECT REVOKE & GIVE VIP
+            // TAB 1: USERS TABLE WITH DIRECT REALTIME REVOKE/APPROVE
             const tbody = document.getElementById('adminUserTable');
             tbody.innerHTML = '';
             users.forEach(u => {
                 let statusBadge = "";
                 let actionBtn = "";
 
-                if(u.paid) {
+                if(u.paid === true) {
                     statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">VIP Active</span>`;
-                    actionBtn = `<button onclick="setVIPStatus('${u.email}', false)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-user-xmark mr-1"></i> Kumtoa VIP (Revoke)</button>`;
+                    actionBtn = `<button onclick="forceSetVIPStatus('${u.email}', false)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-[10px] font-bold shadow transition"><i class="fa-solid fa-user-xmark mr-1"></i> Kumtoa VIP (Revoke)</button>`;
                 } else if(u.payment_status === 'pending') {
                     statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Pending Review</span>`;
                     actionBtn = `
-                        <button onclick="setVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow mr-1"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>
-                        <button onclick="setVIPStatus('${u.email}', false)" class="bg-red-600 text-white hover:bg-red-700 px-2 py-1 rounded text-[10px] font-bold"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                        <button onclick="forceSetVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow mr-1"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>
+                        <button onclick="forceSetVIPStatus('${u.email}', false)" class="bg-red-600 text-white hover:bg-red-700 px-2 py-1 rounded text-[10px] font-bold"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
                     `;
                 } else {
                     statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Free</span>`;
-                    actionBtn = `<button onclick="setVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-user-check mr-1"></i> Kumuweka VIP</button>`;
+                    actionBtn = `<button onclick="forceSetVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-user-check mr-1"></i> Kumuweka VIP</button>`;
                 }
 
                 tbody.innerHTML += `
@@ -868,39 +871,38 @@
             const searchesTbody = document.getElementById('adminSearchesTable');
             searchesTbody.innerHTML = '';
             users.forEach(u => {
-                if(u.paid || u.payment_status === 'pending') {
+                if(u.paid === true || u.payment_status === 'pending') {
                     searchesTbody.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
                             <td class="p-2 font-bold">${u.name}</td>
                             <td class="p-2">${u.phone}</td>
                             <td class="p-2 text-slate-500">Mtumishi Aliyematch</td>
                             <td class="p-2 font-mono">${u.tx_code || '-'}</td>
-                            <td class="p-2">${u.paid ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">VIP Active</span>' : '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Pending Approval</span>'}</td>
+                            <td class="p-2">${u.paid === true ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">VIP Active</span>' : '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Pending Approval</span>'}</td>
                         </tr>
                     `;
                 }
             });
         }
 
-        // DIRECT FUNCTION TO GIVE OR REVOKE VIP STATUS SAFELY
-        async function setVIPStatus(email, status) {
-            let updatePayload = {
-                paid: status,
-                payment_status: status ? 'approved' : 'none'
-            };
+        // DIRECT SIMPLE UPDATE FUNCTION FOR VIP STATUS
+        async function forceSetVIPStatus(targetEmail, status) {
+            const { data, error } = await _supabase
+                .from('users')
+                .update({ paid: status, payment_status: status ? 'approved' : 'none' })
+                .eq('email', targetEmail);
 
-            const { error } = await _supabase.from('users').update(updatePayload).eq('email', email);
-            
             if (error) {
-                alert("Makosa katika kusasisha: " + error.message);
+                alert("Makosa kutoka Supabase: " + error.message);
             } else {
                 let currentUser = getCurrentUser();
-                if(currentUser && currentUser.email === email) {
+                if(currentUser && currentUser.email.toLowerCase() === targetEmail.toLowerCase()) {
                     currentUser.paid = status;
                     currentUser.payment_status = status ? 'approved' : 'none';
                     setCurrentUser(currentUser);
                 }
-                alert(`Mabadiliko yamefanikiwa! ${email} sasa hivi ni: ${status ? 'VIP ACTIVE' : 'FREE (Mtumishi Kawaida)'}`);
+
+                alert(`Mabadiliko yamefanikiwa!\nEmail: ${targetEmail}\nHali Mpya: ${status ? 'VIP ACTIVE' : 'FREE / REVOKED'}`);
                 loadAdminData();
             }
         }
