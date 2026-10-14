@@ -240,19 +240,64 @@
 
         <!-- ================= PAGE 3: MY PROFILE ================= -->
         <div id="profileView" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-2xl mx-auto">
-                <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-3"><i class="fa-solid fa-user-gear text-emerald-600 mr-2"></i> Profile na Taarifa Zako</h3>
-                
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-2xl mx-auto space-y-6">
+                <div class="border-b pb-3 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-id-card text-emerald-600 mr-2"></i> Profile na Taarifa Zako Kamili</h3>
+                    <span class="text-xs bg-emerald-50 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-200">Zilizopo Live</span>
+                </div>
+
                 <form id="updateProfileForm" onsubmit="handleUpdateProfile(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Jina Kamili</label>
-                        <input type="text" id="profName" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Email / Username (Isiyobadilika)</label>
+                            <input type="email" id="profEmail" readonly class="w-full px-3 py-2 border rounded-lg text-sm bg-slate-100 font-bold text-slate-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Jina Kamili *</label>
+                            <input type="text" id="profName" required class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Namba ya Simu / WhatsApp</label>
-                        <input type="tel" id="profPhone" required class="w-full px-3 py-2 border rounded-lg text-sm">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Namba ya Simu / WhatsApp *</label>
+                            <input type="tel" id="profPhone" required class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Miaka Kazini *</label>
+                            <input type="number" id="profYears" min="0" max="45" required class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Kada Yako *</label>
+                            <select id="profKada" onchange="toggleSubjectsProfile()" required class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="Ualimu - Sekondari">Ualimu - Sekondari</option>
+                                <option value="Ualimu - Shule ya Msingi">Ualimu - Shule ya Msingi</option>
+                                <option value="Afya - Tabibu / Daktari">Afya - Tabibu / Daktari</option>
+                                <option value="Afya - Muuguzi (Nurse)">Afya - Muuguzi (Nurse)</option>
+                                <option value="Afya - Maabara">Afya - Maabara</option>
+                                <option value="Afisa Kilimo / Mifugo">Afisa Kilimo / Mifugo</option>
+                                <option value="Utawala / Afisa Muhtasi">Utawala / Afisa Muhtasi</option>
+                                <option value="Kada Nyingine">Kada Nyingine</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Masomo ya Walimu Profile -->
+                    <div id="profSubjectSec" class="hidden grid-cols-1 md:grid-cols-2 gap-3 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                        <div>
+                            <label class="block text-xs font-semibold text-emerald-800 mb-1">Somo la Kwanza</label>
+                            <input type="text" id="profSub1" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-emerald-800 mb-1">Somo la Pili</label>
+                            <input type="text" id="profSub2" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Mkoa Uliopo Sasa</label>
                             <select id="profCurrentReg" onchange="loadDistricts('profCurrentReg', 'profCurrentDist')" class="w-full px-3 py-2 border rounded-lg text-sm"></select>
@@ -262,7 +307,8 @@
                             <select id="profCurrentDist" class="w-full px-3 py-2 border rounded-lg text-sm"></select>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Mkoa Unakotaka Kwenda</label>
                             <select id="profTargetReg" onchange="loadDistricts('profTargetReg', 'profTargetDist')" class="w-full px-3 py-2 border rounded-lg text-sm"></select>
@@ -272,8 +318,9 @@
                             <select id="profTargetDist" class="w-full px-3 py-2 border rounded-lg text-sm"></select>
                         </div>
                     </div>
-                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-5 rounded-lg text-sm transition">
-                        Sasisha Taarifa (Update Profile)
+
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-sm transition shadow">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> Sasisha Taarifa za Profile (Update Profile)
                     </button>
                 </form>
             </div>
@@ -281,21 +328,24 @@
 
         <!-- ================= PAGE 4: COMMENTS ================= -->
         <div id="commentsView" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-3xl mx-auto">
-                <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-3"><i class="fa-solid fa-comments text-emerald-600 mr-2"></i> Maoni na Mrejesho wa Watumishi</h3>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-3xl mx-auto space-y-6">
+                <div class="border-b pb-3 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-comments text-emerald-600 mr-2"></i> Maoni na Mrejesho wa Watumishi</h3>
+                    <span class="text-xs text-slate-400">Jumuia ya Utumishi Swap</span>
+                </div>
 
-                <form onsubmit="postComment(event)" class="mb-6 space-y-3">
-                    <textarea id="cmtText" required rows="3" placeholder="Andika maoni yako hapa kuhusu huduma au mfumo huu..." class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-                    <button type="submit" class="bg-slate-800 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-lg transition">Tuma Maoni</button>
+                <form onsubmit="postComment(event)" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <label class="block text-xs font-bold text-slate-700">Andika Maoni au Mrejesho Wako Hapa:</label>
+                    <textarea id="cmtText" required rows="3" placeholder="Andika maoni yako hapa..." class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500 bg-white"></textarea>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Tuma Maoni
+                    </button>
                 </form>
 
-                <div id="commentsFeed" class="space-y-3 max-h-96 overflow-y-auto pr-2">
-                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-xs text-slate-800">Mwl. Godfrey S. (Morogoro)</span>
-                            <span class="text-[10px] text-slate-400">Hivi Karibuni</span>
-                        </div>
-                        <p class="text-xs text-slate-600">Mfumo umenisadia sana kupata mtu wa kubadilishana naye Mbeya. Ahsante sana admin!</p>
+                <div class="space-y-3">
+                    <h4 class="text-sm font-bold text-slate-700">Maoni Yaliyotolewa Hivi Karibuni:</h4>
+                    <div id="commentsFeed" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                        <!-- Dynamic Comments via JS -->
                     </div>
                 </div>
             </div>
@@ -347,10 +397,11 @@
                 </div>
 
                 <!-- Admin Navigation Tabs -->
-                <div class="flex space-x-2 border-b border-slate-200 pb-2">
-                    <button onclick="switchAdminTab('users')" id="tabBtnUsers" class="px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg">Orodha ya Watumishi</button>
-                    <button onclick="switchAdminTab('matches')" id="tabBtnMatches" class="px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg">Watumishi Wanaomatch (<span id="adminMatchCount">0</span>)</button>
-                    <button onclick="switchAdminTab('searches')" id="tabBtnSearches" class="px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg">Watu Waliotafutana</button>
+                <div class="flex space-x-2 border-b border-slate-200 pb-2 overflow-x-auto">
+                    <button onclick="switchAdminTab('users')" id="tabBtnUsers" class="px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg whitespace-nowrap">Orodha ya Watumishi</button>
+                    <button onclick="switchAdminTab('matches')" id="tabBtnMatches" class="px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg whitespace-nowrap">Watumishi Wanaomatch (<span id="adminMatchCount">0</span>)</button>
+                    <button onclick="switchAdminTab('searches')" id="tabBtnSearches" class="px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg whitespace-nowrap">Watu Waliotafutana</button>
+                    <button onclick="switchAdminTab('comments')" id="tabBtnComments" class="px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg whitespace-nowrap">Maoni ya Watumishi</button>
                 </div>
 
                 <!-- TAB 1: ALL USERS WITH APPROVAL WORKFLOW -->
@@ -416,6 +467,14 @@
                             <!-- Interactions via JS -->
                         </tbody>
                     </table>
+                </div>
+
+                <!-- TAB 4: ADMIN COMMENTS MANAGEMENT & DELETE -->
+                <div id="adminTabComments" class="hidden bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="font-bold text-sm mb-3 text-slate-800"><i class="fa-solid fa-comments text-emerald-600 mr-2"></i> Usimamizi wa Maoni (Admin Comment Control)</h3>
+                    <div id="adminCommentsList" class="space-y-3">
+                        <!-- Dynamic Admin Comments via JS -->
+                    </div>
                 </div>
 
             </div>
@@ -560,387 +619,19 @@
             }
         }
 
+        function toggleSubjectsProfile() {
+            const kada = document.getElementById('profKada').value;
+            const subSec = document.getElementById('profSubjectSec');
+            if(kada.includes('Ualimu')) {
+                subSec.classList.remove('hidden');
+                subSec.classList.add('grid');
+            } else {
+                subSec.classList.remove('grid');
+                subSec.classList.add('hidden');
+            }
+        }
+
         function navigate(viewId) {
             ['authView', 'dashboardView', 'profileView', 'commentsView', 'adminView'].forEach(v => {
                 const el = document.getElementById(v);
                 if(el) el.classList.add('hidden');
-            });
-            const targetEl = document.getElementById(viewId);
-            if(targetEl) targetEl.classList.remove('hidden');
-
-            const currentUser = getCurrentUser();
-            if(currentUser) {
-                document.getElementById('appNavLinks').classList.remove('hidden');
-                if(viewId === 'dashboardView') loadDashboard();
-                if(viewId === 'profileView') loadProfileForm();
-            } else {
-                document.getElementById('appNavLinks').classList.add('hidden');
-            }
-
-            if(viewId === 'adminView') {
-                document.getElementById('adminLoginForm').classList.remove('hidden');
-                document.getElementById('adminDashboard').classList.add('hidden');
-            }
-        }
-
-        // Signup User to Supabase Cloud Database
-        async function handleSignup(e) {
-            e.preventDefault();
-            const email = document.getElementById('signEmail').value.trim();
-            const pass = document.getElementById('signPass').value;
-            const name = document.getElementById('signName').value.trim();
-            const phone = document.getElementById('signPhone').value.trim();
-            const kada = document.getElementById('signKada').value;
-            const years = parseInt(document.getElementById('signYears').value) || 0;
-            const sub1 = document.getElementById('signSub1').value.trim();
-            const sub2 = document.getElementById('signSub2').value.trim();
-            const current_region = document.getElementById('signCurrentRegion').value;
-            const current_district = document.getElementById('signCurrentDistrict').value;
-            const target_region = document.getElementById('signTargetRegion').value;
-            const target_district = document.getElementById('signTargetDistrict').value;
-
-            const { data, error } = await _supabase.from('users').insert([
-                { email, pass, name, phone, kada, years, sub1, sub2, current_region, current_district, target_region, target_district, paid: false, payment_status: 'none' }
-            ]);
-
-            if (error) {
-                alert("Makosa katika usajili: " + error.message);
-            } else {
-                alert('Usajili wako umekamilika kikamilifu! Sasa unaweza kuingia (Login) kuona watumishi walio tayari kubadilishana vituo na wewe.');
-                document.getElementById('signupForm').reset();
-            }
-        }
-
-        // Login User from Supabase
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
-            const pass = document.getElementById('loginPass').value;
-
-            const { data, error } = await _supabase.from('users').select('*').eq('email', email).eq('pass', pass).single();
-
-            if (data) {
-                setCurrentUser(data);
-                navigate('dashboardView');
-            } else {
-                alert('Email au Nenosiri sio sahihi. Tafadhali jaribu tena.');
-            }
-        }
-
-        function logoutUser() {
-            localStorage.removeItem('utumishi_current_user');
-            document.getElementById('appNavLinks').classList.add('hidden');
-            navigate('authView');
-        }
-
-        // Load Dashboard & Flexible Broad Match Logic from Supabase
-        async function loadDashboard() {
-            let user = getCurrentUser();
-            if(!user) return;
-
-            // Refresh latest user status directly from Supabase DB to eliminate cache issues
-            const { data: latestUser } = await _supabase.from('users').select('*').eq('email', user.email).single();
-            if(latestUser) {
-                user = latestUser;
-                setCurrentUser(user);
-            }
-
-            document.getElementById('dashWelcomeName').innerText = `Karibu, ${user.name}!`;
-            document.getElementById('dashUserSummary').innerText = `Kada: ${user.kada} | Uliopo: ${user.current_region} (${user.current_district}) ➔ Unataka: ${user.target_region} (${user.target_district})`;
-            
-            const badge = document.getElementById('dashPaidBadge');
-            if(user.paid === true) {
-                badge.className = "bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
-                badge.innerText = "Account Status: VIP ACTIVE";
-            } else if(user.payment_status === 'pending') {
-                badge.className = "bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
-                badge.innerText = "Account Status: MUAMALA UNAPITIWA NA ADMIN (PENDING)";
-            } else {
-                badge.className = "bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase";
-                badge.innerText = "Account Status: FREE";
-            }
-
-            // Fetch All Users from Supabase
-            const { data: users, error } = await _supabase.from('users').select('*');
-            if (error || !users) return;
-
-            // FLEXIBLE MATCHING LOGIC
-            let matches = users.filter(other => {
-                if(other.email.toLowerCase() === user.email.toLowerCase()) return false;
-                if(other.kada !== user.kada) return false;
-
-                // Broad Region Matching
-                let regionMatch = (other.current_region.toLowerCase() === user.target_region.toLowerCase()) || 
-                                  (other.target_region.toLowerCase() === user.current_region.toLowerCase());
-
-                if(!regionMatch) return false;
-
-                // Teachers Subject Match
-                if(user.kada.includes('Ualimu')) {
-                    let uSubs = [user.sub1, user.sub2].map(s => (s || '').trim().toLowerCase()).filter(s => s.length > 0);
-                    let oSubs = [other.sub1, other.sub2].map(s => (s || '').trim().toLowerCase()).filter(s => s.length > 0);
-                    
-                    if(uSubs.length > 0 && oSubs.length > 0) {
-                        let hasCommonSub = uSubs.some(s => oSubs.some(os => os.includes(s) || s.includes(os)));
-                        if(!hasCommonSub) return false;
-                    }
-                }
-
-                return true;
-            });
-
-            document.getElementById('dashMatchCount').innerText = matches.length;
-            const grid = document.getElementById('dashMatchesGrid');
-            grid.innerHTML = '';
-
-            if(matches.length === 0) {
-                grid.innerHTML = `<div class="col-span-full bg-white p-6 rounded-xl text-center text-slate-500 text-sm border">Hakuna mtumishi aliyepatikana kwa sasa anayefanana na vigezo au masomo yako. Tafadhali subiri wengine wajisajili au sasisha mkoa unaotaka.</div>`;
-                return;
-            }
-
-            matches.forEach(m => {
-                let contactDisplay = (user.paid === true) ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-phone mr-1"></i> ${m.phone}</span>` : `<span class="text-slate-400 italic"><i class="fa-solid fa-lock mr-1"></i> Namba imefungwa</span>`;
-                
-                let actionBtn = "";
-                if(user.paid === true) {
-                    actionBtn = `<a href="https://wa.me/255${m.phone.replace(/^0+/, '')}" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition"><i class="fa-brands fa-whatsapp mr-1"></i> Chat WhatsApp</a>`;
-                } else if(user.payment_status === 'pending') {
-                    actionBtn = `<div class="bg-blue-50 text-blue-800 text-[11px] p-2.5 rounded-lg font-bold text-center border border-blue-200"><i class="fa-solid fa-clock fa-spin mr-1"></i> Transaction ID yako inahakikiwa na Admin. Subiri kidogo...</div>`;
-                } else {
-                    actionBtn = `<button onclick="triggerPaymentForUser('${m.name}', '${m.email}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-lg transition shadow"><i class="fa-solid fa-lock mr-1"></i> Bonyeza Uone Namba & WhatsApp</button>`;
-                }
-
-                grid.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                        <div class="flex justify-between items-start">
-                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full">${m.kada}</span>
-                            <span class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i> ${m.years} Miaka Kazini</span>
-                        </div>
-                        <div class="space-y-1 text-xs text-slate-600">
-                            <p><strong class="text-slate-800">Jina:</strong> ${m.name}</p>
-                            <p><strong class="text-slate-800">Yupo Sasa:</strong> ${m.current_region} (${m.current_district})</p>
-                            <p><strong class="text-slate-800">Anataka Kwenda:</strong> ${m.target_region} (${m.target_district})</p>
-                            ${m.sub1 ? `<p><strong class="text-slate-800">Masomo:</strong> ${m.sub1}${m.sub2 ? ', '+m.sub2 : ''}</p>` : ''}
-                            <p class="pt-2">${contactDisplay}</p>
-                        </div>
-                        <div class="pt-2">
-                            ${actionBtn}
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function triggerPaymentForUser(targetName, targetEmail) {
-            selectedTargetContactUser = { name: targetName, email: targetEmail };
-            openPaymentModal();
-        }
-
-        // Admin Auth Logic
-        function loginAdmin() {
-            const u = document.getElementById('adminUser').value.trim();
-            const p = document.getElementById('adminPass').value.trim();
-
-            if(u === 'eprazil@gmail.com' && p === '1995') {
-                document.getElementById('adminLoginForm').classList.add('hidden');
-                document.getElementById('adminDashboard').classList.remove('hidden');
-                loadAdminData();
-            } else {
-                alert('Username au Password ya Admin si sahihi!');
-            }
-        }
-
-        function logoutAdmin() {
-            document.getElementById('adminDashboard').classList.add('hidden');
-            document.getElementById('adminLoginForm').classList.remove('hidden');
-            document.getElementById('adminUser').value = '';
-            document.getElementById('adminPass').value = '';
-        }
-
-        function switchAdminTab(tabName) {
-            ['Users', 'Matches', 'Searches'].forEach(t => {
-                document.getElementById('adminTab' + t).classList.add('hidden');
-                document.getElementById('tabBtn' + t).className = "px-4 py-2 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg";
-            });
-
-            if(tabName === 'users') {
-                document.getElementById('adminTabUsers').classList.remove('hidden');
-                document.getElementById('tabBtnUsers').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg";
-            } else if(tabName === 'matches') {
-                document.getElementById('adminTabMatches').classList.remove('hidden');
-                document.getElementById('tabBtnMatches').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg";
-            } else if(tabName === 'searches') {
-                document.getElementById('adminTabSearches').classList.remove('hidden');
-                document.getElementById('tabBtnSearches').className = "px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg";
-            }
-        }
-
-        // Fetch Real Users Live into Admin Panel
-        async function loadAdminData() {
-            const { data: users, error } = await _supabase.from('users').select('*');
-            if(error) {
-                alert("Makosa katika kupakua orodha ya watumishi: " + error.message);
-                return;
-            }
-            if(!users) return;
-
-            let paidCount = users.filter(u => u.paid === true).length;
-            
-            document.getElementById('statTotalUsers').innerText = users.length;
-            document.getElementById('statPaidUsers').innerText = paidCount;
-            document.getElementById('statEarnings').innerText = `TZS ${(paidCount * 2000).toLocaleString()}`;
-
-            // TAB 1: USERS TABLE WITH DIRECT REALTIME REVOKE/APPROVE
-            const tbody = document.getElementById('adminUserTable');
-            tbody.innerHTML = '';
-            users.forEach(u => {
-                let statusBadge = "";
-                let actionBtn = "";
-
-                if(u.paid === true) {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">VIP Active</span>`;
-                    actionBtn = `<button onclick="forceSetVIPStatus('${u.email}', false)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-[10px] font-bold shadow transition"><i class="fa-solid fa-user-xmark mr-1"></i> Kumtoa VIP (Revoke)</button>`;
-                } else if(u.payment_status === 'pending') {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Pending Review</span>`;
-                    actionBtn = `
-                        <button onclick="forceSetVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow mr-1"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>
-                        <button onclick="forceSetVIPStatus('${u.email}', false)" class="bg-red-600 text-white hover:bg-red-700 px-2 py-1 rounded text-[10px] font-bold"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
-                    `;
-                } else {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Free</span>`;
-                    actionBtn = `<button onclick="forceSetVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-user-check mr-1"></i> Kumuweka VIP</button>`;
-                }
-
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-2 font-bold">${u.name}</td>
-                        <td class="p-2">${u.email}</td>
-                        <td class="p-2">${u.phone}</td>
-                        <td class="p-2">${u.kada}</td>
-                        <td class="p-2">${u.current_region}</td>
-                        <td class="p-2">${u.target_region}</td>
-                        <td class="p-2 font-mono text-xs font-bold text-slate-700">${u.tx_code || '-'}</td>
-                        <td class="p-2">${statusBadge}</td>
-                        <td class="p-2">${actionBtn}</td>
-                    </tr>
-                `;
-            });
-
-            // TAB 2: MATCHING PAIRS FOR ADMIN NOTIFICATIONS
-            const matchesTbody = document.getElementById('adminMatchesTable');
-            matchesTbody.innerHTML = '';
-            let pairCount = 0;
-
-            for(let i=0; i<users.length; i++) {
-                for(let j=i+1; j<users.length; j++) {
-                    let u1 = users[i];
-                    let u2 = users[j];
-
-                    if(u1.kada === u2.kada) {
-                        let isMatch = (u1.current_region.toLowerCase() === u2.target_region.toLowerCase()) || 
-                                      (u2.current_region.toLowerCase() === u1.target_region.toLowerCase());
-
-                        if(isMatch) {
-                            pairCount++;
-                            let subs1 = u1.sub1 ? `${u1.sub1} / ${u1.sub2}` : 'N/A';
-                            
-                            let msgText = `Habari ${u1.name}, kutokea Utumishi Swap. Tumpata mtumishi wa kada yako (${u2.name} wa ${u2.current_region}) anayetaka kwenda ${u2.target_region}. Ingia kwenye mfumo uweze kuwasiliana naye.`;
-                            let waLink1 = `https://wa.me/255${u1.phone.replace(/^0+/, '')}?text=${encodeURIComponent(msgText)}`;
-                            let waLink2 = `https://wa.me/255${u2.phone.replace(/^0+/, '')}?text=${encodeURIComponent(msgText)}`;
-
-                            matchesTbody.innerHTML += `
-                                <tr class="border-b hover:bg-slate-50">
-                                    <td class="p-2 font-bold text-emerald-900">${u1.name}<br><span class="text-[10px] text-slate-500">${u1.phone}</span></td>
-                                    <td class="p-2">${u1.kada}<br><span class="text-[10px] text-slate-500">${subs1}</span></td>
-                                    <td class="p-2">${u1.current_region} ➔ ${u1.target_region}</td>
-                                    <td class="p-2 font-bold text-teal-900">${u2.name}<br><span class="text-[10px] text-slate-500">${u2.phone}</span></td>
-                                    <td class="p-2">${u2.current_region} ➔ ${u2.target_region}</td>
-                                    <td class="p-2 space-y-1">
-                                        <a href="${waLink1}" target="_blank" class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2 py-1 rounded"><i class="fa-brands fa-whatsapp"></i> Tuma U1</a>
-                                        <a href="${waLink2}" target="_blank" class="inline-block bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold px-2 py-1 rounded"><i class="fa-brands fa-whatsapp"></i> Tuma U2</a>
-                                    </td>
-                                </tr>
-                            `;
-                        }
-                    }
-                }
-            }
-            document.getElementById('adminMatchCount').innerText = pairCount;
-
-            // TAB 3: SEARCHED / CONTACTS INTERACTED
-            const searchesTbody = document.getElementById('adminSearchesTable');
-            searchesTbody.innerHTML = '';
-            users.forEach(u => {
-                if(u.paid === true || u.payment_status === 'pending') {
-                    searchesTbody.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-2 font-bold">${u.name}</td>
-                            <td class="p-2">${u.phone}</td>
-                            <td class="p-2 text-slate-500">Mtumishi Aliyematch</td>
-                            <td class="p-2 font-mono">${u.tx_code || '-'}</td>
-                            <td class="p-2">${u.paid === true ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">VIP Active</span>' : '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Pending Approval</span>'}</td>
-                        </tr>
-                    `;
-                }
-            });
-        }
-
-        // DIRECT SIMPLE UPDATE FUNCTION FOR VIP STATUS
-        async function forceSetVIPStatus(targetEmail, status) {
-            const { data, error } = await _supabase
-                .from('users')
-                .update({ paid: status, payment_status: status ? 'approved' : 'none' })
-                .eq('email', targetEmail);
-
-            if (error) {
-                alert("Makosa kutoka Supabase: " + error.message);
-            } else {
-                let currentUser = getCurrentUser();
-                if(currentUser && currentUser.email.toLowerCase() === targetEmail.toLowerCase()) {
-                    currentUser.paid = status;
-                    currentUser.payment_status = status ? 'approved' : 'none';
-                    setCurrentUser(currentUser);
-                }
-
-                alert(`Mabadiliko yamefanikiwa!\nEmail: ${targetEmail}\nHali Mpya: ${status ? 'VIP ACTIVE' : 'FREE / REVOKED'}`);
-                loadAdminData();
-            }
-        }
-
-        function openPaymentModal() {
-            document.getElementById('paymentModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('paymentModal').classList.add('hidden');
-        }
-
-        // SUBMIT PAYMENT FOR ADMIN APPROVAL
-        async function submitPayment() {
-            const tx = document.getElementById('payTxCode').value.trim();
-            if(!tx) {
-                alert('Tafadhali weka namba ya muamala (Transaction ID).');
-                return;
-            }
-
-            let user = getCurrentUser();
-            if(user) {
-                user.paid = false;
-                user.payment_status = 'pending';
-                user.tx_code = tx;
-                setCurrentUser(user);
-
-                await _supabase.from('users').update({ paid: false, payment_status: 'pending', tx_code: tx }).eq('email', user.email);
-            }
-
-            closeModal();
-            alert('Namba yako ya muamala imepokelewa kikamilifu! Tafadhali subiri uhakiki wa Admin (Wait for Approval). Utakapoidhinishwa, utaona namba za simu papo hapo.');
-            loadDashboard();
-        }
-
-        window.onload = function() {
-            populateRegions();
-        };
-    </script>
-</body>
-</html>
