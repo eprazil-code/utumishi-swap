@@ -356,7 +356,7 @@
 
                 <!-- TAB 1: ALL USERS WITH APPROVAL WORKFLOW -->
                 <div id="adminTabUsers" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
-                    <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha Kamili ya Watumishi na Uhakiki wa Malipo</h3>
+                    <h3 class="font-bold text-sm mb-3 text-slate-800">Orodha Kamili ya Watumishi na Usimamizi wa U-VIP</h3>
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-100 text-slate-600 border-b">
                             <tr>
@@ -366,9 +366,9 @@
                                 <th class="p-2">Kada</th>
                                 <th class="p-2">Mkoa Sasa</th>
                                 <th class="p-2">Mkoa Target</th>
-                                <th class="p-2">Tx ID (Kutoka kwa Mteja)</th>
-                                <th class="p-2">Hali ya Malipo</th>
-                                <th class="p-2">Action (Thibitisha)</th>
+                                <th class="p-2">Tx ID</th>
+                                <th class="p-2">Hali ya VIP</th>
+                                <th class="p-2">Badili Hali (Action)</th>
                             </tr>
                         </thead>
                         <tbody id="adminUserTable">
@@ -380,7 +380,7 @@
                 <!-- TAB 2: MATCHING USERS OVERVIEW -->
                 <div id="adminTabMatches" class="hidden bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto space-y-3">
                     <div class="flex justify-between items-center border-b pb-2">
-                        <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-people-arrows text-emerald-600 mr-2"></i> Pairs za Watumishi Wanaomatch (Ili Kuwatafuta & Kutuma Update)</h3>
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-people-arrows text-emerald-600 mr-2"></i> Pairs za Watumishi Wanaomatch</h3>
                         <span class="text-xs text-slate-500">Matching Engine Live</span>
                     </div>
                     <table class="w-full text-left text-xs">
@@ -409,7 +409,7 @@
                                 <th class="p-2">Mtumishi Aliyetafuta</th>
                                 <th class="p-2">Simu Yake</th>
                                 <th class="p-2">Mtumishi Aliyetazamwa</th>
-                                <th class="p-2">Simu Yake</th>
+                                <th class="p-2">Tx ID</th>
                                 <th class="p-2">Hali ya Malipo</th>
                             </tr>
                         </thead>
@@ -424,7 +424,7 @@
 
     </main>
 
-    <!-- Payment Modal (Inatokea TU pale anapotaka kuona namba ya simu) -->
+    <!-- Payment Modal -->
     <div id="paymentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -706,7 +706,7 @@
                 if(user.paid) {
                     actionBtn = `<a href="https://wa.me/255${m.phone.replace(/^0+/, '')}" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition"><i class="fa-brands fa-whatsapp mr-1"></i> Chat WhatsApp</a>`;
                 } else if(user.payment_status === 'pending') {
-                    actionBtn = `<div class="bg-blue-50 text-blue-800 text-[11px] p-2.5 rounded-lg font-bold text-center border border-blue-200"><i class="fa-solid fa-clock fa-spin mr-1"></i> Transaction ID yako inahakikiwa na Admin. Subiri kidoogo (Wait for approval)...</div>`;
+                    actionBtn = `<div class="bg-blue-50 text-blue-800 text-[11px] p-2.5 rounded-lg font-bold text-center border border-blue-200"><i class="fa-solid fa-clock fa-spin mr-1"></i> Transaction ID yako inahakikiwa na Admin. Subiri kidogo...</div>`;
                 } else {
                     actionBtn = `<button onclick="triggerPaymentForUser('${m.name}', '${m.email}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-lg transition shadow"><i class="fa-solid fa-lock mr-1"></i> Bonyeza Uone Namba & WhatsApp</button>`;
                 }
@@ -776,7 +776,7 @@
             }
         }
 
-        // Fetch Real Users Live into Admin Panel with Direct Approval Actions & Matching Analysis
+        // Fetch Real Users Live into Admin Panel
         async function loadAdminData() {
             const { data: users, error } = await _supabase.from('users').select('*');
             if(error || !users) return;
@@ -787,7 +787,7 @@
             document.getElementById('statPaidUsers').innerText = paidCount;
             document.getElementById('statEarnings').innerText = `TZS ${(paidCount * 2000).toLocaleString()}`;
 
-            // TAB 1: USERS TABLE
+            // TAB 1: USERS TABLE WITH DIRECT REVOKE & GIVE VIP
             const tbody = document.getElementById('adminUserTable');
             tbody.innerHTML = '';
             users.forEach(u => {
@@ -795,17 +795,17 @@
                 let actionBtn = "";
 
                 if(u.paid) {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">VIP (Approved)</span>`;
-                    actionBtn = `<button onclick="toggleUserPaidStatus('${u.email}', false, 'none')" class="bg-red-100 text-red-700 hover:bg-red-200 px-2 py-1 rounded text-[10px] font-bold">Revoke VIP</button>`;
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">VIP Active</span>`;
+                    actionBtn = `<button onclick="setVIPStatus('${u.email}', false)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-user-xmark mr-1"></i> Kumtoa VIP (Revoke)</button>`;
                 } else if(u.payment_status === 'pending') {
                     statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Pending Review</span>`;
                     actionBtn = `
-                        <button onclick="toggleUserPaidStatus('${u.email}', true, 'approved')" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow mr-1"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>
-                        <button onclick="toggleUserPaidStatus('${u.email}', false, 'rejected')" class="bg-red-600 text-white hover:bg-red-700 px-2 py-1 rounded text-[10px] font-bold"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                        <button onclick="setVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow mr-1"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>
+                        <button onclick="setVIPStatus('${u.email}', false)" class="bg-red-600 text-white hover:bg-red-700 px-2 py-1 rounded text-[10px] font-bold"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
                     `;
                 } else {
                     statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Free</span>`;
-                    actionBtn = `<button onclick="toggleUserPaidStatus('${u.email}', true, 'approved')" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-check mr-1"></i> Approve VIP</button>`;
+                    actionBtn = `<button onclick="setVIPStatus('${u.email}', true)" class="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1 rounded text-[10px] font-bold shadow"><i class="fa-solid fa-user-check mr-1"></i> Kumuweka VIP</button>`;
                 }
 
                 tbody.innerHTML += `
@@ -874,7 +874,7 @@
                             <td class="p-2 font-bold">${u.name}</td>
                             <td class="p-2">${u.phone}</td>
                             <td class="p-2 text-slate-500">Mtumishi Aliyematch</td>
-                            <td class="p-2 text-slate-500">Tx Code: ${u.tx_code || '-'}</td>
+                            <td class="p-2 font-mono">${u.tx_code || '-'}</td>
                             <td class="p-2">${u.paid ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">VIP Active</span>' : '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Pending Approval</span>'}</td>
                         </tr>
                     `;
@@ -882,13 +882,25 @@
             });
         }
 
-        // Toggle Status Manual Direct in Database & Approval Logic
-        async function toggleUserPaidStatus(email, status, payment_status) {
-            const { error } = await _supabase.from('users').update({ paid: status, payment_status: payment_status }).eq('email', email);
+        // DIRECT FUNCTION TO GIVE OR REVOKE VIP STATUS SAFELY
+        async function setVIPStatus(email, status) {
+            let updatePayload = {
+                paid: status,
+                payment_status: status ? 'approved' : 'none'
+            };
+
+            const { error } = await _supabase.from('users').update(updatePayload).eq('email', email);
+            
             if (error) {
                 alert("Makosa katika kusasisha: " + error.message);
             } else {
-                alert(`Hali ya malipo kwa ${email} imesasishwa kikamilifu! Status: ${status ? 'APPROVED (VIP ACTIVE)' : 'FREE / REJECTED'}`);
+                let currentUser = getCurrentUser();
+                if(currentUser && currentUser.email === email) {
+                    currentUser.paid = status;
+                    currentUser.payment_status = status ? 'approved' : 'none';
+                    setCurrentUser(currentUser);
+                }
+                alert(`Mabadiliko yamefanikiwa! ${email} sasa hivi ni: ${status ? 'VIP ACTIVE' : 'FREE (Mtumishi Kawaida)'}`);
                 loadAdminData();
             }
         }
