@@ -120,13 +120,19 @@
                                     <option value="Afya - Maabara">Afya - Maabara</option>
                                     <option value="Afisa Kilimo / Mifugo">Afisa Kilimo / Mifugo</option>
                                     <option value="Utawala / Afisa Muhtasi">Utawala / Afisa Muhtasi</option>
-                                    <option value="Kada Nyingine">Kada Nyingine</option>
+                                    <option value="Kada Nyingine">Kada / Kozi Nyingine (Andika Yako)</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Miaka Kazini *</label>
                                 <input type="number" id="signYears" min="0" max="45" required placeholder="Mf. 4" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                             </div>
+                        </div>
+
+                        <!-- Custom Kada / Course Input Section -->
+                        <div id="signupCustomKadaSec" class="hidden bg-amber-50 p-3 rounded-xl border border-amber-200">
+                            <label class="block text-xs font-semibold text-amber-900 mb-1">Andika Kada / Kozi Yako Hapa *</label>
+                            <input type="text" id="signCustomKada" placeholder="Mf. Afisa Misitu, Mhandisi wa Maji, n.k." class="w-full px-3 py-2 border rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
 
                         <!-- Masomo kwa Walimu -->
@@ -280,9 +286,15 @@
                                 <option value="Afya - Maabara">Afya - Maabara</option>
                                 <option value="Afisa Kilimo / Mifugo">Afisa Kilimo / Mifugo</option>
                                 <option value="Utawala / Afisa Muhtasi">Utawala / Afisa Muhtasi</option>
-                                <option value="Kada Nyingine">Kada Nyingine</option>
+                                <option value="Kada Nyingine">Kada / Kozi Nyingine (Andika Yako)</option>
                             </select>
                         </div>
+                    </div>
+
+                    <!-- Custom Kada / Course Profile Input Section -->
+                    <div id="profCustomKadaSec" class="hidden bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        <label class="block text-xs font-semibold text-amber-900 mb-1">Andika Kada / Kozi Yako Hapa *</label>
+                        <input type="text" id="profCustomKada" placeholder="Mf. Afisa Misitu, Mhandisi wa Maji, n.k." class="w-full px-3 py-2 border rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
 
                     <!-- Masomo ya Walimu Profile -->
@@ -554,7 +566,7 @@
             "Mtwara": ["Mtwara Mikindani", "Masasi", "Nanyumbu", "Newala"],
             "Njombe": ["Njombe Mjini", "Makambako", "Ludewa", "Wanging'ombe"],
             "Pwani": ["Kibaha Mjini", "Bagamoyo", "Kisarawe", "Mkuranga", "Rufiji"],
-            "Rukwa": ["Sumbawanga Mjini", "Kalambo", "Nkasi"],
+            "Rukwa": ["Sumbawanga Mjini", "Sumbawanga Vijijini", "Kalambo", "Nkasi"],
             "Simiyu": ["Bariadi Mjini", "Busega", "Itilima", "Maswa", "Meatu"],
             "Geita": ["Geita Mjini", "Chato", "Mbogwe", "Nyang'hwale", "Bukombe"],
             "Manyara": ["Babati Mjini", "Hanang", "Kiteto", "Mbulu", "Simanjiro"]
@@ -611,6 +623,8 @@
         function toggleSubjectsSignup() {
             const kada = document.getElementById('signKada').value;
             const subSec = document.getElementById('signupSubjectSec');
+            const customKadaSec = document.getElementById('signupCustomKadaSec');
+
             if(kada.includes('Ualimu')) {
                 subSec.classList.remove('hidden');
                 subSec.classList.add('grid');
@@ -618,11 +632,21 @@
                 subSec.classList.remove('grid');
                 subSec.classList.add('hidden');
             }
+
+            if(kada === 'Kada Nyingine') {
+                customKadaSec.classList.remove('hidden');
+                document.getElementById('signCustomKada').setAttribute('required', 'true');
+            } else {
+                customKadaSec.classList.add('hidden');
+                document.getElementById('signCustomKada').removeAttribute('required');
+            }
         }
 
         function toggleSubjectsProfile() {
             const kada = document.getElementById('profKada').value;
             const subSec = document.getElementById('profSubjectSec');
+            const customKadaSec = document.getElementById('profCustomKadaSec');
+
             if(subSec) {
                 if(kada.includes('Ualimu')) {
                     subSec.classList.remove('hidden');
@@ -630,6 +654,14 @@
                 } else {
                     subSec.classList.remove('grid');
                     subSec.classList.add('hidden');
+                }
+            }
+
+            if(customKadaSec) {
+                if(kada === 'Kada Nyingine') {
+                    customKadaSec.classList.remove('hidden');
+                } else {
+                    customKadaSec.classList.add('hidden');
                 }
             }
         }
@@ -666,7 +698,15 @@
             const pass = document.getElementById('signPass').value;
             const name = document.getElementById('signName').value.trim();
             const phone = document.getElementById('signPhone').value.trim();
-            const kada = document.getElementById('signKada').value;
+            
+            let kada = document.getElementById('signKada').value;
+            if(kada === 'Kada Nyingine') {
+                const customKada = document.getElementById('signCustomKada').value.trim();
+                if(customKada) {
+                    kada = customKada;
+                }
+            }
+
             const years = parseInt(document.getElementById('signYears').value) || 0;
             const sub1 = document.getElementById('signSub1').value.trim();
             const sub2 = document.getElementById('signSub2').value.trim();
@@ -684,6 +724,7 @@
             } else {
                 alert('Usajili wako umekamilika kikamilifu! Sasa unaweza kuingia (Login) kuona watumishi walio tayari kubadilishana vituo na wewe.');
                 document.getElementById('signupForm').reset();
+                toggleSubjectsSignup();
             }
         }
 
@@ -725,7 +766,21 @@
             document.getElementById('profName').value = user.name || '';
             document.getElementById('profPhone').value = user.phone || '';
             document.getElementById('profYears').value = user.years || 0;
-            document.getElementById('profKada').value = user.kada || '';
+            
+            // Check if user's kada is in default options or custom
+            const standardKadas = [
+                "Ualimu - Sekondari", "Ualimu - Shule ya Msingi", "Afya - Tabibu / Daktari", 
+                "Afya - Muuguzi (Nurse)", "Afya - Maabara", "Afisa Kilimo / Mifugo", "Utawala / Afisa Muhtasi"
+            ];
+
+            if(user.kada && !standardKadas.includes(user.kada)) {
+                document.getElementById('profKada').value = 'Kada Nyingine';
+                document.getElementById('profCustomKada').value = user.kada;
+            } else {
+                document.getElementById('profKada').value = user.kada || '';
+                document.getElementById('profCustomKada').value = '';
+            }
+
             document.getElementById('profSub1').value = user.sub1 || '';
             document.getElementById('profSub2').value = user.sub2 || '';
 
@@ -756,7 +811,15 @@
             const name = document.getElementById('profName').value.trim();
             const phone = document.getElementById('profPhone').value.trim();
             const years = parseInt(document.getElementById('profYears').value) || 0;
-            const kada = document.getElementById('profKada').value;
+            
+            let kada = document.getElementById('profKada').value;
+            if(kada === 'Kada Nyingine') {
+                const customKada = document.getElementById('profCustomKada').value.trim();
+                if(customKada) {
+                    kada = customKada;
+                }
+            }
+
             const sub1 = document.getElementById('profSub1').value.trim();
             const sub2 = document.getElementById('profSub2').value.trim();
             const current_region = document.getElementById('profCurrentReg').value;
@@ -822,7 +885,7 @@
             // FLEXIBLE MATCHING LOGIC
             let matches = users.filter(other => {
                 if(other.email.toLowerCase() === user.email.toLowerCase()) return false;
-                if(other.kada !== user.kada) return false;
+                if(other.kada.toLowerCase() !== user.kada.toLowerCase()) return false;
 
                 // Broad Region Matching
                 let regionMatch = (other.current_region.toLowerCase() === user.target_region.toLowerCase()) || 
@@ -1053,7 +1116,7 @@
                     let u1 = users[i];
                     let u2 = users[j];
 
-                    if(u1.kada === u2.kada) {
+                    if(u1.kada.toLowerCase() === u2.kada.toLowerCase()) {
                         let isMatch = (u1.current_region.toLowerCase() === u2.target_region.toLowerCase()) || 
                                       (u2.current_region.toLowerCase() === u1.target_region.toLowerCase());
 
